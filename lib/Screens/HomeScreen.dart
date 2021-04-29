@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:tele_health_app/Screens/SubScreen/Appointment.dart';
 import 'package:tele_health_app/Screens/SubScreen/Chatbot.dart';
+import 'package:tele_health_app/Screens/SubScreen/Drawer.dart';
 import 'package:tele_health_app/Screens/SubScreen/Home.dart';
 import 'package:tele_health_app/Screens/SubScreen/Notification.dart';
 import 'package:tele_health_app/Screens/SubScreen/Profile.dart';
@@ -11,6 +12,7 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+  GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int currentIndex = 0;
 
   @override
@@ -20,11 +22,20 @@ class _HomePageState extends State<HomePage> {
       Home(
         onAppointmentTap: onBookApointment,
         onChatBotTap: onChatBotTap,
+        openDrawer: openDrawer,
       ),
-      Appointment(),
-      Notifications(),
-      ChatBot(),
-      Profile(),
+      Appointment(
+        openDrawer: openDrawer,
+      ),
+      Notifications(
+        openDrawer: openDrawer,
+      ),
+      ChatBot(
+        openDrawer: openDrawer,
+      ),
+      Profile(
+        openDrawer: openDrawer,
+      ),
     ];
   }
 
@@ -42,10 +53,16 @@ class _HomePageState extends State<HomePage> {
     });
   }
 
+  void openDrawer() {
+    _scaffoldKey.currentState.openDrawer();
+  }
+
   @override
   Widget build(BuildContext context) {
     return SafeArea(
       child: Scaffold(
+        key: _scaffoldKey,
+        drawer: AppDrawer(),
         body: widgets[currentIndex],
         bottomNavigationBar: BottomNavigationBar(
           backgroundColor: Colors.blue[100],

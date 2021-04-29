@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 
 class Home extends StatelessWidget {
-  final Function onAppointmentTap, onChatBotTap;
+  final Function onAppointmentTap, onChatBotTap, openDrawer;
 
-  Home({this.onAppointmentTap, this.onChatBotTap});
+  Home({this.onAppointmentTap, this.onChatBotTap, this.openDrawer});
 
   @override
   Widget build(BuildContext context) {
@@ -116,7 +116,10 @@ class Home extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Icon(Icons.menu),
+            child: GestureDetector(
+              onTap: openDrawer,
+              child: Icon(Icons.menu),
+            ),
           ),
           Container(
             height: size.height / 20,
