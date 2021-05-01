@@ -1,12 +1,19 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tele_health_app/Screens/SubScreen/Appointment.dart';
-import 'package:tele_health_app/Screens/SubScreen/Chatbot.dart';
+import 'package:tele_health_app/Screens/SubScreen/Chat%20Bot/Chatbot.dart';
 import 'package:tele_health_app/Screens/SubScreen/Drawer.dart';
 import 'package:tele_health_app/Screens/SubScreen/Home.dart';
 import 'package:tele_health_app/Screens/SubScreen/Notification.dart';
 import 'package:tele_health_app/Screens/SubScreen/Profile.dart';
+import 'package:tele_health_app/Screens/Verified.dart';
 
 class HomePage extends StatefulWidget {
+  final SharedPreferences prefs;
+  HomePage({this.prefs});
+
   @override
   _HomePageState createState() => _HomePageState();
 }
@@ -14,32 +21,36 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   int currentIndex = 0;
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  final FirebaseAuth auth = FirebaseAuth.instance;
+  Map<String, dynamic> profileSnap;
+
+  void getProfileData() async {
+    await firestore
+        .collection(widget.prefs.getBool('isPaitent') ? 'paitent' : 'doctor')
+        .doc(auth.currentUser.uid)
+        .get()
+        .then((snap) {
+      setState(() {
+        if (snap != null) {
+          profileSnap = snap.data();
+          print(profileSnap);
+        }
+      });
+    });
+  }
 
   @override
   void initState() {
+    getProfileData();
     super.initState();
-    widgets = [
-      Home(
-        onAppointmentTap: onBookApointment,
-        onChatBotTap: onChatBotTap,
-        openDrawer: openDrawer,
-      ),
-      Appointment(
-        openDrawer: openDrawer,
-      ),
-      Notifications(
-        openDrawer: openDrawer,
-      ),
-      ChatBot(
-        openDrawer: openDrawer,
-      ),
-      Profile(
-        openDrawer: openDrawer,
-      ),
-    ];
   }
 
-  List<Widget> widgets;
+  void onNotificationTap() {
+    setState(() {
+      currentIndex = 2;
+    });
+  }
 
   void onBookApointment() {
     setState(() {
@@ -63,7 +74,34 @@ class _HomePageState extends State<HomePage> {
       child: Scaffold(
         key: _scaffoldKey,
         drawer: AppDrawer(),
-        body: widgets[currentIndex],
+        body: Builder(builder: (_) {
+          if (currentIndex == 0) {
+            return Home(
+              onAppointmentTap: onBookApointment,
+              onChatBotTap: onChatBotTap,
+              openDrawer: openDrawer,
+              onNotificaationTap: onNotificationTap,
+            );
+          } else if (currentIndex == 1) {
+            return Appointment(
+              openDrawer: openDrawer,
+              onNotifications: onNotificationTap,
+            );
+          } else if (currentIndex == 2) {
+            return Notifications(
+              openDrawer: openDrawer,
+            );
+          } else if (currentIndex == 3) {
+            return ChatBot(
+              openDrawer: openDrawer,
+            );
+          } else {
+            return Profile(
+              openDrawer: openDrawer,
+              userMap: profileSnap,
+            );
+          }
+        }),
         bottomNavigationBar: BottomNavigationBar(
           backgroundColor: Colors.blue[100],
           showSelectedLabels: true,
@@ -107,5 +145,65 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+}
+
+class CheckIfVerified extends StatefulWidget {
+  final SharedPreferences prefs;
+
+  CheckIfVerified({this.prefs});
+
+  @override
+  _CheckIfVerifiedState createState() => _CheckIfVerifiedState();
+}
+
+class _CheckIfVerifiedState extends State<CheckIfVerified> {
+  @override
+  void initState() {
+    super.initState();
+    getProfileData();
+  }
+
+  final FirebaseFirestore firestore = FirebaseFirestore.instance;
+  final FirebaseAuth auth = FirebaseAuth.instance;
+
+  Map<String, dynamic> profileSnap;
+
+  void getProfileData() async {
+    if (widget.prefs.getBool('isPaitent') == false) {
+      await firestore
+          .collection('doctor')
+          .doc(auth.currentUser.uid)
+          .get()
+          .then((snap) {
+        setState(() {
+          if (snap != null) {
+            profileSnap = snap.data();
+            print(profileSnap);
+          }
+        });
+      });
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    if (widget.prefs.getBool('isPaitent') == false) {
+      if (profileSnap != null) {
+        if (profileSnap['isverified'] == false) {
+          return Verify();
+        } else {
+          return HomePage(
+            prefs: widget.prefs,
+          );
+        }
+      } else {
+        return Container();
+      }
+    } else {
+      return HomePage(
+        prefs: widget.prefs,
+      );
+    }
   }
 }

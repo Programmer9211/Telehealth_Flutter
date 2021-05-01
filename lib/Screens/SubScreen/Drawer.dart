@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:tele_health_app/Authenticate/Account.dart';
 
 class AppDrawer extends StatelessWidget {
   @override
@@ -21,22 +22,25 @@ class AppDrawer extends StatelessWidget {
           SizedBox(
             height: size.height / 10,
           ),
-          Container(
-            height: size.height / 18,
-            width: size.width / 2.9,
-            alignment: Alignment.center,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(
-                width: 1.5,
-                color: Colors.black,
+          InkWell(
+            onTap: () => logOut(context),
+            child: Container(
+              height: size.height / 18,
+              width: size.width / 2.9,
+              alignment: Alignment.center,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(20),
+                border: Border.all(
+                  width: 1.5,
+                  color: Colors.black,
+                ),
               ),
-            ),
-            child: Text(
-              "Sign Out",
-              style: TextStyle(
-                fontSize: size.width / 23,
-                fontWeight: FontWeight.w500,
+              child: Text(
+                "Sign Out",
+                style: TextStyle(
+                  fontSize: size.width / 23,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
             ),
           )
@@ -48,14 +52,17 @@ class AppDrawer extends StatelessWidget {
   Widget drawerItems(Size size, String text) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
-      child: Container(
-        height: size.height / 14,
-        width: size.width,
-        alignment: Alignment.center,
-        color: Colors.indigo[100],
-        child: Text(
-          text,
-          style: TextStyle(fontSize: size.width / 20),
+      child: InkWell(
+        onTap: () {},
+        child: Container(
+          height: size.height / 14,
+          width: size.width,
+          alignment: Alignment.center,
+          color: Colors.indigo[100],
+          child: Text(
+            text,
+            style: TextStyle(fontSize: size.width / 20),
+          ),
         ),
       ),
     );

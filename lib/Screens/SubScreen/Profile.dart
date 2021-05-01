@@ -1,34 +1,42 @@
 import 'package:flutter/material.dart';
 
-class Profile extends StatelessWidget {
+class Profile extends StatefulWidget {
   final Function openDrawer;
+  final Map<String, dynamic> userMap;
 
-  Profile({this.openDrawer});
+  Profile({this.openDrawer, this.userMap});
 
+  @override
+  _ProfileState createState() => _ProfileState();
+}
+
+class _ProfileState extends State<Profile> {
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    return Container(
-      height: size.height,
-      width: size.width,
-      child: Column(
-        children: [
-          appBar(size),
-          Container(
-            height: size.height / 4.4,
+    return widget.userMap != null
+        ? Container(
+            height: size.height,
             width: size.width,
-            alignment: Alignment.center,
-            child: Icon(
-              Icons.account_circle,
-              size: size.width / 3,
-              color: Colors.blue[100],
+            child: Column(
+              children: [
+                appBar(size),
+                Container(
+                  height: size.height / 4.4,
+                  width: size.width,
+                  alignment: Alignment.center,
+                  child: Icon(
+                    Icons.account_circle,
+                    size: size.width / 3,
+                    color: Colors.blue[100],
+                  ),
+                ),
+                paitentInfo(size),
+              ],
             ),
-          ),
-          paitentInfo(size),
-        ],
-      ),
-    );
+          )
+        : Container();
   }
 
   Widget paitentInfo(Size size) {
@@ -50,7 +58,7 @@ class Profile extends StatelessWidget {
             child: Row(
               children: [
                 Text(
-                  "Anjali Gupta",
+                  "${widget.userMap['name']}",
                   style: TextStyle(
                     fontWeight: FontWeight.w500,
                     fontSize: size.width / 20,
@@ -60,7 +68,7 @@ class Profile extends StatelessWidget {
                   width: size.width / 3.5,
                 ),
                 Text(
-                  "Female",
+                  widget.userMap['gender'],
                   style: TextStyle(
                     fontSize: size.width / 20,
                   ),
@@ -75,14 +83,14 @@ class Profile extends StatelessWidget {
           Container(
             width: size.width / 1.15,
             child: Text(
-              "+91 8805324689\nanjaligupta@gmail.com\n18 july 1996",
+              "${widget.userMap['mob']}\n${widget.userMap['email']}\nDob",
               style: TextStyle(
                 fontSize: size.width / 20,
               ),
             ),
           ),
           Text(
-            "Age: 25\nWeight: 52 Kg\nHeight: 157.48 cm\nBlood Group: B+",
+            "Age: 25\nWeight: ${widget.userMap['weight']} Kg\nHeight: ${widget.userMap['height']} ft\nBlood Group: ${widget.userMap['bg']}",
             style: TextStyle(
               fontSize: size.width / 20,
             ),
@@ -110,7 +118,7 @@ class Profile extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.all(8.0),
             child: GestureDetector(
-              onTap: openDrawer,
+              onTap: widget.openDrawer,
               child: Icon(Icons.menu),
             ),
           ),

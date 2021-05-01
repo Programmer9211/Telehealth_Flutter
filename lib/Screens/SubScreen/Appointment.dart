@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:tele_health_app/Screens/SubScreen/ChooseDoctor.dart';
 
 class Appointment extends StatefulWidget {
-  final Function openDrawer;
+  final Function openDrawer, onNotifications;
 
-  Appointment({this.openDrawer});
+  Appointment({this.openDrawer, this.onNotifications});
 
   @override
   _AppointmentState createState() => _AppointmentState();
@@ -31,61 +31,63 @@ class _AppointmentState extends State<Appointment> {
     return Container(
       height: size.height,
       width: size.width,
-      child: Column(
-        children: [
-          appBar(size),
-          Container(
-            height: size.height / 10,
-            width: size.width / 1.1,
-            alignment: Alignment.centerLeft,
-            child: Text(
-              "Search or choose your health issues",
-              style: TextStyle(
-                fontSize: size.width / 23,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-          Container(
-            height: size.height / 15,
-            width: size.width / 1.1,
-            child: TextField(
-              decoration: InputDecoration(
-                prefixIcon: Icon(Icons.search),
-                hintText: "Search here e.g:fever",
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(5),
+      child: SingleChildScrollView(
+        child: Column(
+          children: [
+            appBar(size),
+            Container(
+              height: size.height / 10,
+              width: size.width / 1.1,
+              alignment: Alignment.centerLeft,
+              child: Text(
+                "Search or choose your health issues",
+                style: TextStyle(
+                  fontSize: size.width / 23,
+                  fontWeight: FontWeight.w500,
                 ),
               ),
             ),
-          ),
-          Container(
-            height: size.height / 15,
-            width: size.width / 1.1,
-            alignment: Alignment.bottomLeft,
-            child: Text(
-              "Popular Searches",
-              style: TextStyle(
-                fontSize: size.width / 20,
-                fontWeight: FontWeight.w500,
+            Container(
+              height: size.height / 15,
+              width: size.width / 1.1,
+              child: TextField(
+                decoration: InputDecoration(
+                  prefixIcon: Icon(Icons.search),
+                  hintText: "Search here e.g:fever",
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(5),
+                  ),
+                ),
               ),
             ),
-          ),
-          searchitems(size, 0),
-          searchitems(size, 2),
-          searchitems(size, 4),
-          searchitems(size, 6),
-          SizedBox(
-            height: size.height / 15,
-          ),
-          customButton(size),
-        ],
+            Container(
+              height: size.height / 15,
+              width: size.width / 1.1,
+              alignment: Alignment.bottomLeft,
+              child: Text(
+                "Popular Searches",
+                style: TextStyle(
+                  fontSize: size.width / 20,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            searchitems(size, 0),
+            searchitems(size, 2),
+            searchitems(size, 4),
+            searchitems(size, 6),
+            SizedBox(
+              height: size.height / 15,
+            ),
+            customButton(size),
+          ],
+        ),
       ),
     );
   }
 
   Widget customButton(Size size) {
-    return GestureDetector(
+    return InkWell(
       onTap: () => Navigator.of(context)
           .push(MaterialPageRoute(builder: (_) => ChooseDoctor())),
       child: Container(
@@ -178,7 +180,10 @@ class _AppointmentState extends State<Appointment> {
           SizedBox(
             width: size.width / 10,
           ),
-          Icon(Icons.notifications)
+          InkWell(
+            onTap: widget.onNotifications,
+            child: Icon(Icons.notifications),
+          )
         ],
       ),
     );

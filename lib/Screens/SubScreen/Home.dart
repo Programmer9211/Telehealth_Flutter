@@ -1,9 +1,13 @@
 import 'package:flutter/material.dart';
 
 class Home extends StatelessWidget {
-  final Function onAppointmentTap, onChatBotTap, openDrawer;
+  final Function onAppointmentTap, onChatBotTap, openDrawer, onNotificaationTap;
 
-  Home({this.onAppointmentTap, this.onChatBotTap, this.openDrawer});
+  Home(
+      {this.onAppointmentTap,
+      this.onChatBotTap,
+      this.openDrawer,
+      this.onNotificaationTap});
 
   @override
   Widget build(BuildContext context) {
@@ -136,7 +140,10 @@ class Home extends StatelessWidget {
           SizedBox(
             width: size.width / 10,
           ),
-          Icon(Icons.notifications)
+          InkWell(
+            onTap: onNotificaationTap,
+            child: Icon(Icons.notifications),
+          )
         ],
       ),
     );

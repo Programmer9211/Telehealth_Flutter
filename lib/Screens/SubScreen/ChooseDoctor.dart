@@ -1,32 +1,63 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:tele_health_app/Screens/SubScreen/DoctorInfo.dart';
 
-class ChooseDoctor extends StatelessWidget {
+class ChooseDoctor extends StatefulWidget {
+  @override
+  _ChooseDoctorState createState() => _ChooseDoctorState();
+}
+
+class _ChooseDoctorState extends State<ChooseDoctor> {
+  FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  @override
+  void initState() {
+    getDoctors();
+    super.initState();
+  }
+
+  List<QueryDocumentSnapshot> docList;
+
+  void getDoctors() async {
+    await _firestore.collection('doctor').get().then((snap) {
+      setState(() {
+        docList = snap.docs;
+      });
+      print(docList[0].data()['mob']);
+    });
+  }
+
   void onConfirm() {}
 
-  void onKnowMore() {}
+  void onKnowMore(Map<String, dynamic> map) {
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => DoctorInfo(map: map)));
+  }
 
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    return SafeArea(
-      child: Scaffold(
-        body: Column(
-          children: [
-            appBar(size),
-            Container(
-              height: size.height / 15,
-              width: size.width / 1.15,
-              child: Text(
-                "Doctors Available Now",
-                style: TextStyle(fontSize: size.width / 24),
+    return docList != null
+        ? SafeArea(
+            child: Scaffold(
+              body: Column(
+                children: [
+                  appBar(size),
+                  Container(
+                    height: size.height / 15,
+                    width: size.width / 1.15,
+                    child: Text(
+                      "Doctors Available Now",
+                      style: TextStyle(fontSize: size.width / 24),
+                    ),
+                  ),
+                  doctorList(size),
+                ],
               ),
             ),
-            doctorList(size),
-          ],
-        ),
-      ),
-    );
+          )
+        : Container();
   }
 
   Widget doctorList(Size size) {
@@ -34,14 +65,16 @@ class ChooseDoctor extends StatelessWidget {
       height: size.height / 1.25,
       width: size.width,
       child: ListView.builder(
-          itemCount: 6,
+          itemCount: docList.length,
           itemBuilder: (context, index) {
-            return itemBuilder(size);
+            return itemBuilder(size, index);
           }),
     );
   }
 
-  Widget itemBuilder(Size size) {
+  Widget itemBuilder(Size size, int index) {
+    Map<String, dynamic> map = docList[index].data();
+
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 10.0, vertical: 8),
       child: Container(
@@ -77,14 +110,14 @@ class ChooseDoctor extends StatelessWidget {
                     height: size.height / 50,
                   ),
                   Text(
-                    "Dr. Pradeep Kumar",
+                    map['name'],
                     style: TextStyle(
                       fontSize: size.width / 19,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
                   Text(
-                    "Hair and Skin\n   Specialist",
+                    "${map['ed']}\n   Specialist",
                     style: TextStyle(
                       fontSize: size.width / 25,
                       fontWeight: FontWeight.w500,
@@ -93,7 +126,7 @@ class ChooseDoctor extends StatelessWidget {
                   Padding(
                     padding: const EdgeInsets.all(4.0),
                     child: Text(
-                      "    MBBS,DDVL\n   Experience- 07",
+                      "    ${map['qualification']}\n   Experience- ${map['experience']}",
                       style: TextStyle(
                         fontSize: size.width / 25,
                         //fontWeight: FontWeight.w500,
@@ -104,13 +137,13 @@ class ChooseDoctor extends StatelessWidget {
                     height: size.height / 40,
                   ),
                   Text(
-                    "₹ 550",
+                    "₹ ${map['fee']}",
                     style: TextStyle(
                       fontSize: size.width / 22,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
-                  buttonAlignment(size)
+                  buttonAlignment(size, map)
                 ],
               ),
             ),
@@ -120,14 +153,14 @@ class ChooseDoctor extends StatelessWidget {
     );
   }
 
-  Widget buttonAlignment(Size size) {
+  Widget buttonAlignment(Size size, Map<String, dynamic> map) {
     return Container(
       height: size.height / 10,
       width: size.width / 1.7,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          button("Know More", size, onKnowMore),
+          button("Know More", size, () => onKnowMore(map)),
           button("Confirm", size, onConfirm),
         ],
       ),
@@ -160,7 +193,10 @@ class ChooseDoctor extends StatelessWidget {
         children: [
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: Icon(Icons.arrow_back),
+            child: InkWell(
+              onTap: () => Navigator.pop(context),
+              child: Icon(Icons.arrow_back),
+            ),
           ),
           Container(
               height: size.height / 20,
@@ -176,7 +212,10 @@ class ChooseDoctor extends StatelessWidget {
           SizedBox(
             width: size.width / 10,
           ),
-          Icon(Icons.close)
+          InkWell(
+            onTap: () => Navigator.pop(context),
+            child: Icon(Icons.close),
+          )
         ],
       ),
     );
