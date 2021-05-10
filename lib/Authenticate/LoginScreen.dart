@@ -3,12 +3,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tele_health_app/Authenticate/Account.dart';
 import 'package:tele_health_app/Authenticate/DoctorForm.dart';
 import 'package:tele_health_app/Authenticate/PaitentForm.dart';
-import 'package:tele_health_app/Screens/HomeScreen.dart';
+import 'package:tele_health_app/Screens/SubScreens/Doctor/HomeScreen.dart';
+import 'package:tele_health_app/Screens/SubScreens/Paitent/HomeScreen.dart';
+import 'package:toast/toast.dart';
 
 class LoginScreen extends StatefulWidget {
   final SharedPreferences prefs;
+  final int identity;
 
-  const LoginScreen({Key key, this.prefs}) : super(key: key);
+  const LoginScreen({Key key, this.prefs, this.identity}) : super(key: key);
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -17,21 +20,42 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   TextEditingController _email = TextEditingController();
   TextEditingController _password = TextEditingController();
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String profession = "Profession";
-  bool isPaitent;
+  bool isloading;
 
   void onLogin() async {
-    await widget.prefs.setBool("isPaitent", isPaitent);
-    logIn(_email.text, _password.text).then((user) {
-      if (user != null) {
-        Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-                builder: (_) => CheckIfVerified(
-                      prefs: widget.prefs,
-                    )),
-            (Route<dynamic> route) => false);
+    if (_email.text.isNotEmpty && _password.text.isNotEmpty) {
+      if (widget.identity == 1) {
+        await widget.prefs.setBool("isPaitent", true);
+        logIn(_email.text, _password.text).then((user) {
+          if (user != null) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                  builder: (_) => CheckIfVerified(
+                        prefs: widget.prefs,
+                      )),
+              (Route<dynamic> route) => false,
+            );
+          }
+        });
+      } else if (widget.identity == 2) {
+        await widget.prefs.setBool("isPaitent", false);
+        logIn(_email.text, _password.text).then((user) {
+          if (user != null) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(
+                  builder: (_) => HomePage(
+                        prefs: widget.prefs,
+                      )),
+              (Route<dynamic> route) => false,
+            );
+          }
+        });
       }
-    });
+    } else {
+      Toast.show("Please fill form correctly", context, duration: 2);
+    }
   }
 
   void onPaitentLogin() {
@@ -48,157 +72,159 @@ class _LoginScreenState extends State<LoginScreen> {
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
 
-    return Scaffold(
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            SizedBox(
-              height: size.height / 8,
-            ),
-            Text(
-              "Login",
-              style: TextStyle(
-                fontSize: 30,
-                fontWeight: FontWeight.bold,
+    return WillPopScope(
+      onWillPop: () {
+        if (isloading == true) {
+        } else {
+          Navigator.pop(context);
+        }
+      },
+      child: Scaffold(
+        key: _scaffoldKey,
+        body: SingleChildScrollView(
+          child: Column(
+            children: [
+              SizedBox(
+                height: size.height / 20,
               ),
-            ),
-            SizedBox(
-              height: size.height / 15,
-            ),
-            Container(
-              height: size.height / 15,
-              width: size.width,
-              alignment: Alignment.center,
-              child: field(size, "Email", _email),
-            ),
-            SizedBox(
-              height: size.height / 30,
-            ),
-            Container(
-              height: size.height / 15,
-              width: size.width,
-              alignment: Alignment.center,
-              child: field(size, "Password", _password),
-            ),
-            SizedBox(
-              height: size.height / 30,
-            ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Text(
-                  profession,
+              isloading == true
+                  ? Container(
+                      height: size.height / 20,
+                      width: size.width,
+                    )
+                  : Container(
+                      height: size.height / 20,
+                      width: size.width,
+                      alignment: Alignment.centerLeft,
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.arrow_back_ios_outlined,
+                        ),
+                        //onPressed: () => Navigator.pop(context),
+                        onPressed: () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                                builder: (_) => DoctorHomescreen())),
+                      ),
+                    ),
+              SizedBox(
+                height: size.height / 20,
+              ),
+              Container(
+                width: size.width / 1.1,
+                child: Text(
+                  "Welcome,",
                   style: TextStyle(
-                    fontSize: size.width / 22,
-                    fontWeight: FontWeight.w500,
+                    fontSize: size.width / 14,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
-                PopupMenuButton(
-                  onSelected: (val) {
-                    if (val == 1) {
-                      profession = "Doctor";
-                      isPaitent = false;
-                    } else if (val == 2) {
-                      profession = "Paitent";
-                      isPaitent = true;
-                    }
-
-                    setState(() {});
-                  },
-                  icon: Icon(
-                    Icons.arrow_drop_down,
-                  ),
-                  itemBuilder: (_) => [
-                    PopupMenuItem(
-                      child: Text("Doctor"),
-                      value: 1,
-                    ),
-                    PopupMenuItem(
-                      child: Text("Paitent"),
-                      value: 2,
-                    ),
-                  ],
-                )
-              ],
-            ),
-            SizedBox(
-              height: size.height / 10,
-            ),
-            ElevatedButton(
-              onPressed: onLogin,
-              child: Text(
-                "Login",
-                style: TextStyle(fontSize: 17, fontWeight: FontWeight.w500),
               ),
-              style: ElevatedButton.styleFrom(
-                padding: EdgeInsets.symmetric(vertical: 14, horizontal: 35),
-                primary: Colors.indigo,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(20),
+              Container(
+                width: size.width / 1.1,
+                child: Text(
+                  "Sign In to Continue!",
+                  style: TextStyle(
+                      fontSize: size.width / 20,
+                      fontWeight: FontWeight.w500,
+                      color: Colors.grey[700]),
                 ),
               ),
-            ),
-            SizedBox(
-              height: size.height / 20,
-            ),
-            Text(
-              "sign up",
-              style: TextStyle(
-                fontSize: 25,
-                fontWeight: FontWeight.w500,
+              SizedBox(
+                height: size.height / 15,
               ),
-            ),
-            SizedBox(
-              height: size.height / 32,
-            ),
-            Text(
-              "as",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w500,
+              Container(
+                width: size.width,
+                alignment: Alignment.center,
+                child:
+                    textField(size, 'email', Icons.account_box_rounded, _email),
               ),
-            ),
-            SizedBox(
-              height: size.height / 30,
-            ),
-            Container(
-              height: size.height / 10,
-              width: size.width,
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  customButton("Paitent", onPaitentLogin),
-                  customButton("Doctor", onDoctorLogin),
-                ],
+              SizedBox(
+                height: size.height / 40,
               ),
-            ),
-          ],
+              Container(
+                width: size.width,
+                alignment: Alignment.center,
+                child: textField(size, 'password', Icons.lock, _password),
+              ),
+              SizedBox(
+                height: size.height / 10,
+              ),
+              Material(
+                elevation: 10,
+                color: Colors.blue,
+                borderRadius: BorderRadius.circular(8),
+                child: GestureDetector(
+                  onTap: onLogin,
+                  child: Container(
+                    height: size.height / 12.5,
+                    width: size.width / 1.2,
+                    alignment: Alignment.center,
+                    decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                    child: isloading == true
+                        ? CircularProgressIndicator(
+                            backgroundColor: Colors.white,
+                          )
+                        : Text(
+                            'Login',
+                            style: TextStyle(
+                              fontSize: size.width / 22,
+                              color: Colors.white,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                  ),
+                ),
+              ),
+              SizedBox(
+                height: size.height / 4.5,
+              ),
+              // isloading == true
+              //     ? Container()
+              //     : Row(
+              //         mainAxisAlignment: MainAxisAlignment.center,
+              //         children: [
+              //           Text(
+              //             "I'm a New User,",
+              //             style: TextStyle(
+              //               fontSize: size.width / 25,
+              //               fontWeight: FontWeight.w500,
+              //             ),
+              //           ),
+              //           GestureDetector(
+              //             onTap: () => Navigator.of(context).push(
+              //                 MaterialPageRoute(builder: (_) => Register())),
+              //             child: Text(
+              //               "SignUp",
+              //               style: TextStyle(
+              //                   fontSize: size.width / 25,
+              //                   fontWeight: FontWeight.w500,
+              //                   color: Colors.blue),
+              //             ),
+              //           ),
+              //         ],
+              //       ),
+            ],
+          ),
         ),
       ),
     );
   }
 
-  Widget customButton(String text, Function func) {
-    return ElevatedButton(
-      onPressed: func,
-      child: Text(
-        text,
-        style: TextStyle(fontWeight: FontWeight.w500, fontSize: 18),
-      ),
-      style: ElevatedButton.styleFrom(
-          primary: Colors.black,
-          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 25)),
-    );
-  }
-
-  Widget field(Size size, String text, TextEditingController controller) {
+  Widget textField(Size size, String title, IconData icon,
+      TextEditingController controller) {
     return Container(
-      height: size.height / 15,
-      width: size.width / 1.2,
+      width: size.width / 1.1,
+      alignment: Alignment.center,
       child: TextField(
         controller: controller,
         decoration: InputDecoration(
-          hintText: text,
+          prefixIcon: Icon(icon),
+          border: OutlineInputBorder(
+            borderRadius: BorderRadius.circular(12),
+          ),
+          labelText: title,
         ),
       ),
     );

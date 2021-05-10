@@ -2,7 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tele_health_app/Authenticate/Account.dart';
-import 'package:tele_health_app/Screens/HomeScreen.dart';
+import 'package:tele_health_app/Screens/SubScreens/Paitent/HomeScreen.dart';
 
 class DoctorForm extends StatefulWidget {
   final SharedPreferences prefs;
