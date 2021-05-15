@@ -1,12 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tele_health_app/Authenticate/Account.dart';
 import 'package:tele_health_app/Screens/SubScreens/Paitent/Appointments.dart';
 import 'package:tele_health_app/Screens/SubScreens/Paitent/AvalibleDoctors.dart';
 import 'package:tele_health_app/Screens/SubScreens/Paitent/Chat%20Bot/Chatbot.dart';
 import 'package:tele_health_app/Screens/SubScreens/Paitent/MedicalRecord.dart';
 import 'package:tele_health_app/Screens/SubScreens/Paitent/Profile.dart';
-import 'package:tele_health_app/Screens/SubScreens/Paitent/consult.dart';
 
 class AppDrawer extends StatelessWidget {
+  final Function profileFunction;
+  final SharedPreferences prefs;
+  final Map<String, dynamic> userMap;
+
+  AppDrawer({this.profileFunction, this.userMap, this.prefs});
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -27,7 +34,10 @@ class AppDrawer extends StatelessWidget {
             Navigator.pop(context);
             Navigator.of(context).push(
               MaterialPageRoute(
-                builder: (_) => Profile(),
+                builder: (_) => Profile(
+                  userMap: userMap,
+                  func: profileFunction,
+                ),
               ),
             );
           }),
@@ -76,7 +86,30 @@ class AppDrawer extends StatelessWidget {
             );
           }),
           SizedBox(
-            height: size.height / 60,
+            height: size.height / 10,
+          ),
+
+          InkWell(
+            onTap: () => logOut(context, prefs),
+            child: Container(
+              height: size.height / 20,
+              width: size.width / 4.5,
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(10),
+                border: Border.all(
+                  width: 1,
+                  color: Colors.black,
+                ),
+              ),
+              alignment: Alignment.center,
+              child: Text(
+                "Log Out",
+                style: TextStyle(
+                  fontSize: size.width / 26,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
           ),
           // tile(size, Icons.dock, "Consult a Doctor", () {
           //   Navigator.pop(context);

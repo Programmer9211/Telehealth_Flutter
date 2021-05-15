@@ -1,4 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:tele_health_app/Screens/SubScreens/Paitent/TimeCheck.dart';
+import 'package:toast/toast.dart';
 
 class AvalibleDoctors extends StatefulWidget {
   final String category;
@@ -10,6 +13,31 @@ class AvalibleDoctors extends StatefulWidget {
 }
 
 class _AvalibleDoctorsState extends State<AvalibleDoctors> {
+  FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  List<Map<String, dynamic>> docList;
+
+  @override
+  void initState() {
+    super.initState();
+    getDoctorList();
+  }
+
+  void getDoctorList() async {
+    List<DocumentSnapshot> docs = [];
+    try {
+      await _firestore.collection('doctor').get().then((value) {
+        setState(() {
+          docs = value.docs;
+          docList = docs.map((DocumentSnapshot documentSnapshot) {
+            return documentSnapshot.data();
+          }).toList();
+        });
+      });
+    } catch (e) {
+      Toast.show("An Unexpected Error Occured", context);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -21,7 +49,15 @@ class _AvalibleDoctorsState extends State<AvalibleDoctors> {
         ),
         backgroundColor: Color.fromRGBO(55, 82, 178, 1),
       ),
-      body: doctorCardBuilder(size),
+      body: docList != null
+          ? doctorCardBuilder(size)
+          : Center(
+              child: Container(
+                height: size.height / 20,
+                width: size.height / 20,
+                child: CircularProgressIndicator(),
+              ),
+            ),
     );
   }
 
@@ -30,14 +66,23 @@ class _AvalibleDoctorsState extends State<AvalibleDoctors> {
       height: size.height,
       width: size.width,
       child: ListView.builder(
-          itemCount: 10,
+          itemCount: docList.length,
           itemBuilder: (_, index) {
-            return doctorCard(size);
+            return doctorCard(
+              size,
+              docList[index]['name'],
+              docList[index]['ed'],
+              docList[index]['fee'],
+              docList[index]['experience'],
+              docList[index]['qualification'],
+              docList[index]['uid'],
+            );
           }),
     );
   }
 
-  Widget doctorCard(Size size) {
+  Widget doctorCard(Size size, String doctorName, String specialization,
+      String fee, String experience, String qualification, String uid) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 12.0, horizontal: 9),
       child: Material(
@@ -66,7 +111,7 @@ class _AvalibleDoctorsState extends State<AvalibleDoctors> {
                 child: Container(
                   width: size.width / 1.7,
                   child: Text(
-                    "Doctor Name ",
+                    doctorName,
                     style: TextStyle(
                       fontSize: size.width / 22,
                       fontWeight: FontWeight.w500,
@@ -78,7 +123,7 @@ class _AvalibleDoctorsState extends State<AvalibleDoctors> {
                 top: size.width / 5,
                 left: size.width / 3.5,
                 child: Text(
-                  "Specializations",
+                  specialization,
                   style: TextStyle(
                     fontSize: size.width / 26,
                   ),
@@ -95,7 +140,7 @@ class _AvalibleDoctorsState extends State<AvalibleDoctors> {
                 top: size.width / 7,
                 left: size.width / 3.5,
                 child: Text(
-                  "10 Years Experience",
+                  "$experience Years Experience",
                   style: TextStyle(
                     fontSize: size.width / 26,
                   ),
@@ -114,7 +159,7 @@ class _AvalibleDoctorsState extends State<AvalibleDoctors> {
                 left: size.width / 16,
                 bottom: size.width / 3,
                 child: Text(
-                  "Rs. 500 Consultant Fee",
+                  "Rs. $fee Consultant Fee",
                   style: TextStyle(
                     fontSize: size.width / 26,
                     fontWeight: FontWeight.w500,
@@ -125,7 +170,7 @@ class _AvalibleDoctorsState extends State<AvalibleDoctors> {
                 top: size.width / 2.2,
                 left: size.width / 16,
                 child: Text(
-                  "Next Avalible At",
+                  "Next Avalible ",
                   style: TextStyle(
                     color: Colors.green,
                     fontSize: size.width / 26,
@@ -146,7 +191,7 @@ class _AvalibleDoctorsState extends State<AvalibleDoctors> {
                       width: size.width / 60,
                     ),
                     Text(
-                      "5:20pm, today",
+                      " Today",
                       style: TextStyle(
                         fontSize: size.width / 25,
                         fontWeight: FontWeight.w500,
@@ -159,7 +204,13 @@ class _AvalibleDoctorsState extends State<AvalibleDoctors> {
                 bottom: size.width / 40,
                 left: size.width / 18,
                 child: GestureDetector(
-                  onTap: () {},
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => TimeAvailible(
+                        doctorId: uid,
+                      ),
+                    ),
+                  ),
                   child: Material(
                     elevation: 4,
                     borderRadius: BorderRadius.circular(10),

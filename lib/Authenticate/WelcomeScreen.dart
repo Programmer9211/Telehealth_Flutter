@@ -175,8 +175,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   () => Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => LoginScreen(
-                        prefs: widget.prefs,
                         identity: 1,
+                        prefs: widget.prefs,
                       ),
                     ),
                   ),
@@ -189,8 +189,8 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   () => Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => LoginScreen(
-                        prefs: widget.prefs,
                         identity: 2,
+                        prefs: widget.prefs,
                       ),
                     ),
                   ),
@@ -222,9 +222,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   Icons.account_box,
                   () => Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => PaitentForm(
-                        prefs: widget.prefs,
-                      ),
+                      builder: (_) => PaitentForm(),
                     ),
                   ),
                 ),

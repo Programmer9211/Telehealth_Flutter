@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tele_health_app/Authenticate/Account.dart';
 import 'package:tele_health_app/Authenticate/DoctorForm.dart';
 import 'package:tele_health_app/Authenticate/PaitentForm.dart';
-import 'package:tele_health_app/Screens/SubScreens/Doctor/HomeScreen.dart';
+import 'package:tele_health_app/Screens/SubScreens/Admin/HomeScreen.dart';
 import 'package:tele_health_app/Screens/SubScreens/Paitent/HomeScreen.dart';
 import 'package:toast/toast.dart';
 
@@ -11,7 +11,7 @@ class LoginScreen extends StatefulWidget {
   final SharedPreferences prefs;
   final int identity;
 
-  const LoginScreen({Key key, this.prefs, this.identity}) : super(key: key);
+  const LoginScreen({Key key, this.identity, this.prefs}) : super(key: key);
 
   @override
   _LoginScreenState createState() => _LoginScreenState();
@@ -26,9 +26,8 @@ class _LoginScreenState extends State<LoginScreen> {
 
   void onLogin() async {
     if (_email.text.isNotEmpty && _password.text.isNotEmpty) {
-      if (widget.identity == 1) {
-        await widget.prefs.setBool("isPaitent", true);
-        logIn(_email.text, _password.text).then((user) {
+      if (widget.identity == 2) {
+        logIn(_email.text, _password.text, context).then((user) async {
           if (user != null) {
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(
@@ -37,11 +36,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       )),
               (Route<dynamic> route) => false,
             );
+            await widget.prefs.setInt('identity', 2);
           }
         });
-      } else if (widget.identity == 2) {
-        await widget.prefs.setBool("isPaitent", false);
-        logIn(_email.text, _password.text).then((user) {
+      } else if (widget.identity == 1) {
+        logIn(_email.text, _password.text, context).then((user) async {
           if (user != null) {
             Navigator.of(context).pushAndRemoveUntil(
               MaterialPageRoute(
@@ -50,6 +49,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       )),
               (Route<dynamic> route) => false,
             );
+            await widget.prefs.setInt('identity', 1);
+          }
+        });
+      } else if (widget.identity == 3) {
+        logIn(_email.text, _password.text, context).then((user) async {
+          if (user != null) {
+            Navigator.of(context).pushAndRemoveUntil(
+              MaterialPageRoute(builder: (_) => AdminHomeScreen()),
+              (Route<dynamic> route) => false,
+            );
+            await widget.prefs.setInt('identity', 3);
           }
         });
       }
@@ -59,13 +69,12 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   void onPaitentLogin() {
-    Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => PaitentForm(prefs: widget.prefs)));
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => PaitentForm()));
   }
 
   void onDoctorLogin() {
-    Navigator.of(context).push(
-        MaterialPageRoute(builder: (_) => DoctorForm(prefs: widget.prefs)));
+    Navigator.of(context).push(MaterialPageRoute(builder: (_) => DoctorForm()));
   }
 
   @override
@@ -103,7 +112,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         //onPressed: () => Navigator.pop(context),
                         onPressed: () => Navigator.of(context).push(
                             MaterialPageRoute(
-                                builder: (_) => DoctorHomescreen())),
+                                builder: (_) => AdminHomeScreen())),
                       ),
                     ),
               SizedBox(

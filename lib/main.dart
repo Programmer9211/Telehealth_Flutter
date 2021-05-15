@@ -6,24 +6,19 @@ import 'package:tele_health_app/Authenticate/Authenticate.dart';
 Future main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
-  SharedPreferences preferences = await SharedPreferences.getInstance();
-  runApp(MyApp(
-    prefs: preferences,
-  ));
+  SharedPreferences prefs = await SharedPreferences.getInstance();
+  runApp(MyApp(prefs: prefs));
 }
 
 class MyApp extends StatelessWidget {
   final SharedPreferences prefs;
   MyApp({this.prefs});
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Flutter Demo',
       debugShowCheckedModeBanner: false,
-      home: Authenticate(
-        prefs: prefs,
-      ),
+      home: Authenticate(prefs),
     );
   }
 }

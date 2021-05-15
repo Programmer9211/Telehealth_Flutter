@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tele_health_app/Screens/SubScreens/Doctor/HomeScreen.dart';
 import 'package:tele_health_app/Screens/SubScreens/Paitent/AvalibleDoctors.dart';
 import 'package:tele_health_app/Screens/SubScreens/Paitent/Drawer.dart';
 import 'package:tele_health_app/Screens/SubScreens/Paitent/Profile.dart';
@@ -20,13 +21,30 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
   GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
-
+  FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  FirebaseAuth _auth = FirebaseAuth.instance;
   List<Data> itemdata;
 
   @override
   void initState() {
     super.initState();
     itemdata = data();
+    getUserInfo();
+  }
+
+  Map<String, dynamic> userMap = {};
+
+  void getUserInfo() async {
+    await _firestore
+        .collection('paitent')
+        .doc(_auth.currentUser.uid)
+        .get()
+        .then((value) {
+      setState(() {
+        userMap = value.data();
+      });
+      print(userMap);
+    });
   }
 
   List<Data> data() {
@@ -40,20 +58,20 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-      Data(
-        text: "Clinic visit",
-        imageUrl: "assets/2.png",
-        func: () {
-          Toast.show("Not Avalible Now", context);
-        },
-      ),
-      Data(
-        text: "Ambulance",
-        imageUrl: "assets/3.png",
-        func: () {
-          Toast.show("Not Avalible Now", context);
-        },
-      ),
+      // Data(
+      //   text: "Clinic visit",
+      //   imageUrl: "assets/2.png",
+      //   func: () {
+      //     Toast.show("Not Avalible Now", context);
+      //   },
+      // ),
+      // Data(
+      //   text: "Ambulance",
+      //   imageUrl: "assets/3.png",
+      //   func: () {
+      //     Toast.show("Not Avalible Now", context);
+      //   },
+      // ),
     ];
     return itemdata;
   }
@@ -65,7 +83,11 @@ class _HomePageState extends State<HomePage> {
     return SafeArea(
       child: Scaffold(
         key: _scaffoldKey,
-        drawer: AppDrawer(),
+        drawer: AppDrawer(
+          profileFunction: getUserInfo,
+          userMap: userMap,
+          prefs: widget.prefs,
+        ),
         body: SingleChildScrollView(
           child: Column(
             children: [
@@ -121,7 +143,7 @@ class _HomePageState extends State<HomePage> {
               SizedBox(
                 height: size.height / 30,
               ),
-              categoriesBuilder(size, "Cough", "Covid 19"),
+              categoriesBuilder(size, "Cough", "Cold"),
               SizedBox(
                 height: size.height / 25,
               ),
@@ -311,7 +333,10 @@ class _HomePageState extends State<HomePage> {
             GestureDetector(
               onTap: () => Navigator.of(context).push(
                 MaterialPageRoute(
-                  builder: (_) => Profile(),
+                  builder: (_) => Profile(
+                    func: getUserInfo,
+                    userMap: userMap,
+                  ),
                 ),
               ),
               child: Icon(Icons.account_box),
@@ -325,7 +350,6 @@ class _HomePageState extends State<HomePage> {
 
 class CheckIfVerified extends StatefulWidget {
   final SharedPreferences prefs;
-
   CheckIfVerified({this.prefs});
 
   @override
@@ -345,40 +369,32 @@ class _CheckIfVerifiedState extends State<CheckIfVerified> {
   Map<String, dynamic> profileSnap;
 
   void getProfileData() async {
-    if (widget.prefs.getBool('isPaitent') == false) {
-      await firestore
-          .collection('doctor')
-          .doc(auth.currentUser.uid)
-          .get()
-          .then((snap) {
-        setState(() {
-          if (snap != null) {
-            profileSnap = snap.data();
-            print(profileSnap);
-          }
-        });
+    await firestore
+        .collection('doctor')
+        .doc(auth.currentUser.uid)
+        .get()
+        .then((snap) {
+      setState(() {
+        if (snap != null) {
+          profileSnap = snap.data();
+          print(profileSnap);
+        }
       });
-    }
+    });
   }
 
   @override
   Widget build(BuildContext context) {
-    if (widget.prefs.getBool('isPaitent') == false) {
-      if (profileSnap != null) {
-        if (profileSnap['isverified'] == false) {
-          return Verify();
-        } else {
-          return HomePage(
-            prefs: widget.prefs,
-          );
-        }
+    if (profileSnap != null) {
+      if (profileSnap['isverified'] == false) {
+        return Verify();
       } else {
-        return Container();
+        return DoctorHomescreen(
+          prefs: widget.prefs,
+        );
       }
     } else {
-      return HomePage(
-        prefs: widget.prefs,
-      );
+      return Container();
     }
   }
 }

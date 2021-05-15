@@ -35,23 +35,19 @@ class _DoctorFormState extends State<DoctorForm> {
       "isverified": false,
     };
 
-    await widget.prefs.setBool("isPaitent", false);
-
     FirebaseFirestore firestore = FirebaseFirestore.instance;
 
-    createAccount(_email.text, _password.text).then((user) async {
+    createAccount(_email.text, _password.text, context).then((user) async {
       await firestore
           .collection('doctor')
           .doc(user.uid)
           .set(userMap)
           .then((value) {
         Navigator.of(context).pushAndRemoveUntil(
-            MaterialPageRoute(
-                builder: (_) => CheckIfVerified(
-                      prefs: widget.prefs,
-                    )),
+            MaterialPageRoute(builder: (_) => CheckIfVerified()),
             (Route<dynamic> route) => false);
       });
+      await widget.prefs.setInt('identity', 2);
     });
   }
 

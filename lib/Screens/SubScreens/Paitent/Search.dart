@@ -69,13 +69,65 @@ class Search extends SearchDelegate {
           },
         ),
         tiles(
-          "Covid 19",
+          "Cold",
           () {
             Navigator.pop(context);
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (_) => AvalibleDoctors(
-                  category: "covid",
+                  category: "cold",
+                ),
+              ),
+            );
+          },
+        ),
+        tiles(
+          "ent",
+          () {
+            Navigator.pop(context);
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => AvalibleDoctors(
+                  category: "cold",
+                ),
+              ),
+            );
+          },
+        ),
+        tiles(
+          "Allergist",
+          () {
+            Navigator.pop(context);
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => AvalibleDoctors(
+                  category: "cold",
+                ),
+              ),
+            );
+          },
+        ),
+        tiles(
+          "Dermatologist",
+          () {
+            Navigator.pop(context);
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => AvalibleDoctors(
+                  category: "cold",
+                ),
+              ),
+            );
+          },
+        ),
+        tiles(
+          "Infectious Disease",
+          () {
+            Navigator.pop(context);
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => AvalibleDoctors(
+                  category: "cold",
                 ),
               ),
             );
@@ -89,6 +141,7 @@ class Search extends SearchDelegate {
     return ListTile(
       onTap: func,
       title: Text(text),
+      trailing: Icon(Icons.arrow_forward_ios),
     );
   }
 }

@@ -2,9 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:tele_health_app/Authenticate/LoginScreen.dart';
+import 'package:tele_health_app/Authenticate/Authenticate.dart';
+import 'package:toast/toast.dart';
 
-Future<User> createAccount(String email, String password) async {
+Future<User> createAccount(
+    String email, String password, BuildContext context) async {
   FirebaseAuth auth = FirebaseAuth.instance;
 
   try {
@@ -21,33 +23,27 @@ Future<User> createAccount(String email, String password) async {
     }
   } catch (e) {
     print(e);
+    Toast.show("An Unexpected Error Occured", context);
     return null;
   }
 }
 
-Future logOut(BuildContext context) async {
+Future logOut(BuildContext context, SharedPreferences prefs) async {
   FirebaseAuth auth = FirebaseAuth.instance;
 
   try {
-    SharedPreferences prefs = await SharedPreferences.getInstance();
     await auth.signOut().then((value) async {
       Navigator.of(context).pushAndRemoveUntil(
-          MaterialPageRoute(
-              builder: (_) => LoginScreen(
-                    prefs: prefs,
-                  )),
+          MaterialPageRoute(builder: (_) => Authenticate(prefs)),
           (Route<dynamic> route) => false);
-
-      await prefs.clear().then((value) {
-        print(value);
-      });
     });
   } catch (e) {
+    Toast.show("An Unexpected Error Occured", context);
     print("error");
   }
 }
 
-Future<User> logIn(String email, String password) async {
+Future<User> logIn(String email, String password, BuildContext context) async {
   FirebaseAuth auth = FirebaseAuth.instance;
 
   try {
@@ -57,12 +53,14 @@ Future<User> logIn(String email, String password) async {
 
     if (user != null) {
       print("Login Sucess");
+
       return user;
     } else {
       print("Error");
       return user;
     }
   } catch (e) {
+    Toast.show("An Unexpected Error Occured", context);
     print("error");
     return null;
   }

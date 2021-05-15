@@ -1,7 +1,11 @@
 import 'dart:io';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:toast/toast.dart';
 
 class MedicalReport extends StatefulWidget {
   @override
@@ -9,19 +13,80 @@ class MedicalReport extends StatefulWidget {
 }
 
 class _MedicalReportState extends State<MedicalReport> {
+  String uid = FirebaseAuth.instance.currentUser.uid;
+  FirebaseFirestore _firestore = FirebaseFirestore.instance;
   File image;
+  String imageUrl;
+
+  @override
+  void initState() {
+    super.initState();
+    getImage();
+  }
+
+  Future getImage() async {
+    try {
+      await _firestore
+          .collection('paitent')
+          .doc(uid)
+          .collection('report')
+          .doc(uid)
+          .get()
+          .then((value) {
+        if (mounted) {
+          imageUrl = value.data()['image'];
+          setState(() {});
+        }
+        print(value.data()['image']);
+      });
+    } catch (e) {
+      Toast.show("Error", context);
+    }
+  }
+
+  Future uploadImage() async {
+    try {
+      Reference _ref = FirebaseStorage.instance.ref().child('images/');
+
+      UploadTask uploadTask = _ref.putFile(image);
+
+      await uploadTask.snapshot.ref.getDownloadURL().then((value) async {
+        if (value != null) {
+          print(value);
+          Toast.show("Image Uploaded Sucessfully", context);
+          await _firestore
+              .collection('paitent')
+              .doc(uid)
+              .collection('report')
+              .doc(uid)
+              .set({"image": value});
+
+          getImage();
+        } else {
+          Toast.show("An Error Occured while uploading Image", context);
+        }
+      });
+    } catch (e) {
+      Toast.show("An Error Occured while uploading Image", context);
+    }
+  }
 
   Future selectImage() async {
     ImagePicker pick = ImagePicker();
     Navigator.pop(context);
 
-    await pick.getImage(source: ImageSource.gallery).then((value) {
-      setState(() {
-        if (value != null) {
-          image = File(value.path);
-        }
+    try {
+      await pick.getImage(source: ImageSource.gallery).then((value) {
+        setState(() {
+          if (value != null) {
+            image = File(value.path);
+            uploadImage();
+          }
+        });
       });
-    });
+    } catch (e) {
+      Toast.show("Error", context);
+    }
   }
 
   void onTap(BuildContext context, Size size) {
@@ -69,36 +134,48 @@ class _MedicalReportState extends State<MedicalReport> {
 
       //
 
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Container(
-            width: size.width,
-            alignment: Alignment.center,
-            child: Text(
-              "Add a Medical Record",
-              style: TextStyle(
-                fontSize: size.width / 20,
-                fontWeight: FontWeight.w500,
+      body: imageUrl != null
+          ? Center(
+              child: Container(
+                height: size.height / 1.5,
+                width: size.width / 1.1,
+                decoration: BoxDecoration(
+                  image: DecorationImage(
+                    image: NetworkImage(imageUrl),
+                  ),
+                ),
               ),
+            )
+          : Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Container(
+                  width: size.width,
+                  alignment: Alignment.center,
+                  child: Text(
+                    "Add a Medical Record",
+                    style: TextStyle(
+                      fontSize: size.width / 20,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+                Container(
+                  height: size.height / 14,
+                  width: size.width,
+                  alignment: Alignment.center,
+                  child: Text(
+                    "A Detail Health history helps Doctor\nDiagnose you better",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      fontSize: size.width / 25,
+                      color: Colors.grey,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
             ),
-          ),
-          Container(
-            height: size.height / 14,
-            width: size.width,
-            alignment: Alignment.center,
-            child: Text(
-              "A Detail Health history helps Doctor\nDiagnose you better",
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontSize: size.width / 25,
-                color: Colors.grey,
-                fontWeight: FontWeight.w500,
-              ),
-            ),
-          ),
-        ],
-      ),
 
       //
 

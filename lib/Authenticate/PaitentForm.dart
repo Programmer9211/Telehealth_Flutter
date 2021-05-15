@@ -37,14 +37,16 @@ class _PaitentFormState extends State<PaitentForm> {
       "password": _password.text,
     };
 
-    await widget.prefs.setBool("isPaitent", true);
-
-    createAccount(_email.text, _password.text).then((user) async {
+    createAccount(_email.text, _password.text, context).then((user) async {
       await _firestore.collection('paitent').doc(user.uid).set(map);
-      Navigator.of(context).push(MaterialPageRoute(
-          builder: (_) => CheckIfVerified(
-                prefs: widget.prefs,
-              )));
+      await widget.prefs.setInt('identity', 1);
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => HomePage(
+            prefs: widget.prefs,
+          ),
+        ),
+      );
     });
   }
 
