@@ -4,6 +4,8 @@ class ChatBotCommands {
   List<String> illnessSuggestionList = <String>[
     "fever",
     "Headache",
+    "Cold",
+    "Cough"
   ];
 
   List<List<String>> headacheList = [

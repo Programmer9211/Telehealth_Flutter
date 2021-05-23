@@ -35,9 +35,11 @@ class _PaitentFormState extends State<PaitentForm> {
       "height": _height.text,
       "weight": _weight.text,
       "password": _password.text,
+      "image": ""
     };
 
-    createAccount(_email.text, _password.text, context).then((user) async {
+    createAccount(_name.text, _email.text, _password.text, context)
+        .then((user) async {
       await _firestore.collection('paitent').doc(user.uid).set(map);
       await widget.prefs.setInt('identity', 1);
       Navigator.of(context).push(

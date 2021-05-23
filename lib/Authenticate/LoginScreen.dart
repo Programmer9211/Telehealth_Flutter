@@ -1,8 +1,7 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tele_health_app/Authenticate/Account.dart';
-import 'package:tele_health_app/Authenticate/DoctorForm.dart';
-import 'package:tele_health_app/Authenticate/PaitentForm.dart';
 import 'package:tele_health_app/Screens/SubScreens/Admin/HomeScreen.dart';
 import 'package:tele_health_app/Screens/SubScreens/Paitent/HomeScreen.dart';
 import 'package:toast/toast.dart';
@@ -18,14 +17,21 @@ class LoginScreen extends StatefulWidget {
 }
 
 class _LoginScreenState extends State<LoginScreen> {
-  TextEditingController _email = TextEditingController();
-  TextEditingController _password = TextEditingController();
+  final TextEditingController _email = TextEditingController();
+  final TextEditingController _password = TextEditingController();
+  final TextEditingController _reset = TextEditingController();
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
   String profession = "Profession";
-  bool isloading;
+  bool isloading = false;
 
   void onLogin() async {
     if (_email.text.isNotEmpty && _password.text.isNotEmpty) {
+      setState(() {
+        isloading = true;
+      });
+
       if (widget.identity == 2) {
         logIn(_email.text, _password.text, context).then((user) async {
           if (user != null) {
@@ -37,6 +43,9 @@ class _LoginScreenState extends State<LoginScreen> {
               (Route<dynamic> route) => false,
             );
             await widget.prefs.setInt('identity', 2);
+            setState(() {
+              isloading = false;
+            });
           }
         });
       } else if (widget.identity == 1) {
@@ -50,16 +59,22 @@ class _LoginScreenState extends State<LoginScreen> {
               (Route<dynamic> route) => false,
             );
             await widget.prefs.setInt('identity', 1);
+            setState(() {
+              isloading = false;
+            });
           }
         });
       } else if (widget.identity == 3) {
         logIn(_email.text, _password.text, context).then((user) async {
           if (user != null) {
             Navigator.of(context).pushAndRemoveUntil(
-              MaterialPageRoute(builder: (_) => AdminHomeScreen()),
+              MaterialPageRoute(builder: (_) => AdminHomeScreen(widget.prefs)),
               (Route<dynamic> route) => false,
             );
             await widget.prefs.setInt('identity', 3);
+            setState(() {
+              isloading = false;
+            });
           }
         });
       }
@@ -68,13 +83,46 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void onPaitentLogin() {
-    Navigator.of(context)
-        .push(MaterialPageRoute(builder: (_) => PaitentForm()));
-  }
-
-  void onDoctorLogin() {
-    Navigator.of(context).push(MaterialPageRoute(builder: (_) => DoctorForm()));
+  void onForgotPassword() {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        title: Text(
+          "Enter Gmail",
+          style: TextStyle(),
+        ),
+        content: TextField(
+          controller: _reset,
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("Cancel"),
+          ),
+          TextButton(
+            onPressed: () {
+              if (_reset.text.isNotEmpty) {
+                Navigator.pop(context);
+                try {
+                  _auth.sendPasswordResetEmail(email: _reset.text).then(
+                        (value) => Toast.show("Link Send Sucessfully", context),
+                      );
+                } catch (e) {
+                  print(e);
+                }
+                _reset.clear();
+              } else {
+                Toast.show("Please Enter a valid gmail", context);
+              }
+            },
+            child: Text("Done"),
+          )
+        ],
+      ),
+    );
   }
 
   @override
@@ -112,7 +160,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         //onPressed: () => Navigator.pop(context),
                         onPressed: () => Navigator.of(context).push(
                             MaterialPageRoute(
-                                builder: (_) => AdminHomeScreen())),
+                                builder: (_) => AdminHomeScreen(widget.prefs))),
                       ),
                     ),
               SizedBox(
@@ -155,8 +203,22 @@ class _LoginScreenState extends State<LoginScreen> {
                 alignment: Alignment.center,
                 child: textField(size, 'password', Icons.lock, _password),
               ),
+              Container(
+                height: size.height / 30,
+                width: size.width / 1.2,
+                alignment: Alignment.bottomRight,
+                child: GestureDetector(
+                  onTap: onForgotPassword,
+                  child: Text(
+                    "Forgot Password?",
+                    style: TextStyle(
+                      color: Colors.blue,
+                    ),
+                  ),
+                ),
+              ),
               SizedBox(
-                height: size.height / 10,
+                height: size.height / 25,
               ),
               Material(
                 elevation: 10,
@@ -189,31 +251,6 @@ class _LoginScreenState extends State<LoginScreen> {
               SizedBox(
                 height: size.height / 4.5,
               ),
-              // isloading == true
-              //     ? Container()
-              //     : Row(
-              //         mainAxisAlignment: MainAxisAlignment.center,
-              //         children: [
-              //           Text(
-              //             "I'm a New User,",
-              //             style: TextStyle(
-              //               fontSize: size.width / 25,
-              //               fontWeight: FontWeight.w500,
-              //             ),
-              //           ),
-              //           GestureDetector(
-              //             onTap: () => Navigator.of(context).push(
-              //                 MaterialPageRoute(builder: (_) => Register())),
-              //             child: Text(
-              //               "SignUp",
-              //               style: TextStyle(
-              //                   fontSize: size.width / 25,
-              //                   fontWeight: FontWeight.w500,
-              //                   color: Colors.blue),
-              //             ),
-              //           ),
-              //         ],
-              //       ),
             ],
           ),
         ),

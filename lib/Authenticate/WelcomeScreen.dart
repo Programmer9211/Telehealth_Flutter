@@ -222,7 +222,9 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
                   Icons.account_box,
                   () => Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => PaitentForm(),
+                      builder: (_) => PaitentForm(
+                        prefs: widget.prefs,
+                      ),
                     ),
                   ),
                 ),

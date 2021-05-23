@@ -30,58 +30,6 @@ class Search extends SearchDelegate {
     return ListView(
       children: [
         tiles(
-          "Fever",
-          () {
-            Navigator.pop(context);
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => AvalibleDoctors(
-                  category: "fever",
-                ),
-              ),
-            );
-          },
-        ),
-        tiles(
-          "Headache",
-          () {
-            Navigator.pop(context);
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => AvalibleDoctors(
-                  category: "headache",
-                ),
-              ),
-            );
-          },
-        ),
-        tiles(
-          "Cough",
-          () {
-            Navigator.pop(context);
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => AvalibleDoctors(
-                  category: "cough",
-                ),
-              ),
-            );
-          },
-        ),
-        tiles(
-          "Cold",
-          () {
-            Navigator.pop(context);
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => AvalibleDoctors(
-                  category: "cold",
-                ),
-              ),
-            );
-          },
-        ),
-        tiles(
           "ent",
           () {
             Navigator.pop(context);

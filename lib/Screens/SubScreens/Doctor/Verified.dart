@@ -1,6 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tele_health_app/Authenticate/Account.dart';
 
 class Verify extends StatelessWidget {
+  final SharedPreferences prefs;
+  Verify({this.prefs});
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -8,6 +12,10 @@ class Verify extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(
         title: Text("Not Verified"),
+        actions: [
+          IconButton(
+              icon: Icon(Icons.logout), onPressed: () => logOut(context, prefs))
+        ],
       ),
       body: Container(
         height: size.height,

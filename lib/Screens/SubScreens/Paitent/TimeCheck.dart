@@ -1,11 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:razorpay_flutter/razorpay_flutter.dart';
 import 'package:toast/toast.dart';
 
 class TimeAvailible extends StatefulWidget {
-  final String doctorId;
+  final String doctorId, doctorname, amount;
 
-  TimeAvailible({this.doctorId});
+  TimeAvailible({this.doctorId, this.doctorname, this.amount});
 
   @override
   _TimeAvailibleState createState() => _TimeAvailibleState();
@@ -16,15 +18,69 @@ class _TimeAvailibleState extends State<TimeAvailible> {
   List<Color> primaryColor = <Color>[];
   List<Color> secondaryColor = <Color>[];
   List<String> documentId = [];
-  FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   String selectedTime;
   int listIndex;
+  Razorpay _razorpay;
+  Map<String, dynamic> userMap;
 
   @override
   void initState() {
     super.initState();
+    _razorpay = Razorpay();
+    _razorpay.on(Razorpay.EVENT_PAYMENT_SUCCESS, handlePaymentSuccess);
+    _razorpay.on(Razorpay.EVENT_PAYMENT_ERROR, handlePaymentError);
+    _razorpay.on(Razorpay.EVENT_EXTERNAL_WALLET, handleExternalWallet);
     initializeColor();
+    getUserDetails();
     getSchedule();
+  }
+
+  void getUserDetails() async {
+    await _firestore
+        .collection('paitent')
+        .doc(_auth.currentUser.uid)
+        .get()
+        .then((value) {
+      setState(() {
+        userMap = value.data();
+        print(userMap);
+      });
+    });
+  }
+
+  void onPayment() {
+    Map<String, dynamic> options = {
+      "key": "rzp_test_PR05SUaukQBiX2",
+      "amount": num.parse(widget.amount) * 100,
+      "name": "TeleHealth Application",
+      "description": "",
+      "prefill": {"contact": userMap['mob'], "email": userMap['email']},
+      "external": {
+        "wallets": ["paytm"]
+      }
+    };
+
+    try {
+      _razorpay.open(options);
+    } catch (e) {
+      print("error: $e");
+    }
+  }
+
+  void handlePaymentSuccess(PaymentSuccessResponse response) async {
+    Toast.show(
+        "Payment Sucessfull\nPayment Id: ${response.paymentId}\n OrderId : ${response.orderId}",
+        context);
+  }
+
+  void handlePaymentError(PaymentFailureResponse response) async {
+    Toast.show("Payment Sucessfull", context);
+  }
+
+  void handleExternalWallet(ExternalWalletResponse response) async {
+    Toast.show("Payment Sucessfull", context);
   }
 
   void initializeColor() {
@@ -36,7 +92,7 @@ class _TimeAvailibleState extends State<TimeAvailible> {
 
   void getSchedule() async {
     List<DocumentSnapshot> snap = [];
-
+    print(widget.doctorId);
     try {
       await _firestore
           .collection('doctor')
@@ -54,7 +110,6 @@ class _TimeAvailibleState extends State<TimeAvailible> {
             documentId.add(element.id);
           });
         }
-
         setState(() {});
         print(scheduleMap);
         print(documentId);
@@ -66,6 +121,7 @@ class _TimeAvailibleState extends State<TimeAvailible> {
 
   Future confirmAppointment() async {
     if (selectedTime != null && listIndex != null) {
+      onPayment();
       try {
         await _firestore
             .collection('doctor')
@@ -74,6 +130,25 @@ class _TimeAvailibleState extends State<TimeAvailible> {
             .doc(documentId[listIndex])
             .update({"isappointed": true, "isavalible": false}).then(
                 (value) => print("Appointment sucessful"));
+
+        await _firestore
+            .collection('doctor')
+            .doc(widget.doctorId)
+            .collection('appointment')
+            .add({
+          "uid": _auth.currentUser.uid,
+          "name": _auth.currentUser.displayName,
+          "time": selectedTime,
+        });
+
+        await _firestore
+            .collection('paitent')
+            .doc(_auth.currentUser.uid)
+            .collection('appointment')
+            .add({
+          "name": widget.doctorname,
+          "time": selectedTime,
+        });
       } catch (e) {
         Toast.show("Error Occured", context);
       }
@@ -193,5 +268,11 @@ class _TimeAvailibleState extends State<TimeAvailible> {
         ),
       ),
     );
+  }
+
+  @override
+  void dispose() {
+    _razorpay.clear();
+    super.dispose();
   }
 }

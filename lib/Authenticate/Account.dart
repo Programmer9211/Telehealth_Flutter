@@ -6,7 +6,7 @@ import 'package:tele_health_app/Authenticate/Authenticate.dart';
 import 'package:toast/toast.dart';
 
 Future<User> createAccount(
-    String email, String password, BuildContext context) async {
+    String name, String email, String password, BuildContext context) async {
   FirebaseAuth auth = FirebaseAuth.instance;
 
   try {
@@ -16,6 +16,7 @@ Future<User> createAccount(
 
     if (user != null) {
       print("Login Sucess");
+      user.updateProfile(displayName: name);
       return user;
     } else {
       print("Login Falied");

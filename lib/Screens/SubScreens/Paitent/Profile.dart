@@ -212,16 +212,25 @@ class _ProfileState extends State<Profile> {
               ),
               GestureDetector(
                 onTap: onImageTap,
-                child: Container(
-                  height: size.height / 3.5,
-                  width: size.width,
-                  decoration: BoxDecoration(
-                      shape: BoxShape.circle,
-                      image: DecorationImage(
-                        image: NetworkImage(user['image']),
-                        fit: BoxFit.cover,
-                      )),
-                ),
+                child: user['image'] != " "
+                    ? Container(
+                        height: size.height / 3.5,
+                        width: size.width,
+                        decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                              image: NetworkImage(user['image']),
+                              fit: BoxFit.cover,
+                            )),
+                      )
+                    : Container(
+                        height: size.height / 3.5,
+                        width: size.width,
+                        child: Icon(
+                          Icons.account_circle,
+                          size: size.width / 2,
+                        ),
+                      ),
               ),
               tile(size, user['name'], context, 'name'),
               dob(),

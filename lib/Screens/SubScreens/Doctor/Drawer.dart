@@ -2,12 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tele_health_app/Authenticate/Account.dart';
 import 'package:tele_health_app/Screens/SubScreens/Doctor/Appointment.dart';
-import 'package:tele_health_app/Screens/SubScreens/Doctor/Notification.dart';
 import 'package:tele_health_app/Screens/SubScreens/Doctor/Schedule.dart';
 
 class DoctorDrawer extends StatelessWidget {
+  final String name, email, image;
   final SharedPreferences prefs;
-  DoctorDrawer(this.prefs);
+  DoctorDrawer(this.prefs, this.name, this.email, this.image);
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -16,29 +16,20 @@ class DoctorDrawer extends StatelessWidget {
       child: Column(
         children: [
           UserAccountsDrawerHeader(
-            accountName: Text("DoctorName"),
-            accountEmail: Text("Doctor Email"),
+            accountName: Text(name),
+            accountEmail: Text(email),
             currentAccountPicture: Container(
               height: size.height / 9,
               width: size.width / 3,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
+                image: DecorationImage(
+                    image: NetworkImage(image != "i"
+                        ? image
+                        : "https://image.freepik.com/free-vector/cartoon-male-doctor-holding-clipboard_29190-4660.jpg")),
                 color: Colors.white,
               ),
             ),
-          ),
-          tile(
-            size,
-            Icons.notifications,
-            "Notifications",
-            () {
-              Navigator.pop(context);
-              Navigator.of(context).push(
-                MaterialPageRoute(
-                  builder: (_) => DoctorNotification(),
-                ),
-              );
-            },
           ),
           SizedBox(
             height: size.height / 50,

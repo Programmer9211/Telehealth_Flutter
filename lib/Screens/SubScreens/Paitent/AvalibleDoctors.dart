@@ -15,17 +15,27 @@ class AvalibleDoctors extends StatefulWidget {
 class _AvalibleDoctorsState extends State<AvalibleDoctors> {
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
   List<Map<String, dynamic>> docList;
+  String collection;
 
   @override
   void initState() {
     super.initState();
+    collection = getCollection();
     getDoctorList();
+  }
+
+  String getCollection() {
+    if (widget.category != null) {
+      return widget.category.toLowerCase();
+    } else {
+      return "doctor";
+    }
   }
 
   void getDoctorList() async {
     List<DocumentSnapshot> docs = [];
     try {
-      await _firestore.collection('doctor').get().then((value) {
+      await _firestore.collection(collection).get().then((value) {
         setState(() {
           docs = value.docs;
           docList = docs.map((DocumentSnapshot documentSnapshot) {
@@ -65,19 +75,33 @@ class _AvalibleDoctorsState extends State<AvalibleDoctors> {
     return Container(
       height: size.height,
       width: size.width,
-      child: ListView.builder(
-          itemCount: docList.length,
-          itemBuilder: (_, index) {
-            return doctorCard(
-              size,
-              docList[index]['name'],
-              docList[index]['ed'],
-              docList[index]['fee'],
-              docList[index]['experience'],
-              docList[index]['qualification'],
-              docList[index]['uid'],
-            );
-          }),
+      child: docList.length > 0
+          ? ListView.builder(
+              itemCount: docList.length,
+              itemBuilder: (_, index) {
+                return doctorCard(
+                  size,
+                  docList[index]['name'],
+                  docList[index]['ed'],
+                  docList[index]['fee'],
+                  docList[index]['experience'],
+                  docList[index]['qualification'],
+                  docList[index]['uid'],
+                );
+              },
+            )
+          : Container(
+              height: size.height,
+              width: size.width,
+              alignment: Alignment.center,
+              child: Text(
+                "No Doctor Avalible!",
+                style: TextStyle(
+                  fontSize: size.width / 20,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
     );
   }
 
@@ -207,6 +231,8 @@ class _AvalibleDoctorsState extends State<AvalibleDoctors> {
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
                       builder: (_) => TimeAvailible(
+                        amount: fee,
+                        doctorname: doctorName,
                         doctorId: uid,
                       ),
                     ),

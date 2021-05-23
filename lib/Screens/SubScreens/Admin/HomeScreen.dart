@@ -1,7 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:tele_health_app/Authenticate/Account.dart';
+import 'package:toast/toast.dart';
 
 class AdminHomeScreen extends StatefulWidget {
+  final SharedPreferences prefs;
+  AdminHomeScreen(this.prefs);
   @override
   _AdminHomeScreenState createState() => _AdminHomeScreenState();
 }
@@ -9,9 +14,31 @@ class AdminHomeScreen extends StatefulWidget {
 class _AdminHomeScreenState extends State<AdminHomeScreen> {
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  void onAccept() {}
+  void onAccept(String uid, String docsId) async {
+    await _firestore
+        .collection('doctor')
+        .doc(uid)
+        .update({"isverified": true}).then((value) async {
+      Toast.show("Permission Granted", context);
 
-  void onReject() {}
+      await _firestore
+          .collection('admin')
+          .doc('LLOFlbON1rRcZ2rrzCBYwQL00As1')
+          .collection('verification')
+          .doc(docsId)
+          .delete();
+    });
+  }
+
+  void onReject(String docsId) async {
+    await _firestore
+        .collection('admin')
+        .doc('LLOFlbON1rRcZ2rrzCBYwQL00As1')
+        .collection('verification')
+        .doc(docsId)
+        .delete()
+        .then((value) => Toast.show("Permission Denied", context));
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -20,13 +47,26 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text("Admin"),
+        actions: [
+          IconButton(
+              icon: Icon(Icons.logout),
+              onPressed: () => logOut(context, widget.prefs))
+        ],
       ),
-      body: StreamBuilder(
-        stream: _firestore.collection('admin').get().asStream(),
-        builder: (context, snapshot) {
+      body: StreamBuilder<QuerySnapshot>(
+        stream: _firestore
+            .collection('admin')
+            .doc('LLOFlbON1rRcZ2rrzCBYwQL00As1')
+            .collection('verification')
+            .snapshots(),
+        builder: (context, AsyncSnapshot<QuerySnapshot> snapshot) {
           if (snapshot.hasData) {
             if (snapshot.data != null) {
-              return haveData(size);
+              if (snapshot.data.docs.length > 0) {
+                return haveData(size, snapshot);
+              } else {
+                return noData(size);
+              }
             } else {
               return noData(size);
             }
@@ -53,7 +93,7 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     );
   }
 
-  Widget haveData(Size size) {
+  Widget haveData(Size size, AsyncSnapshot<QuerySnapshot> snapshot) {
     return Container(
       height: size.height,
       width: size.width,
@@ -62,8 +102,10 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
         height: size.height,
         width: size.width / 1.08,
         child: ListView.builder(
-          itemCount: 4,
+          itemCount: snapshot.data.docs.length,
           itemBuilder: (_, index) {
+            Map<String, dynamic> map = snapshot.data.docs[index].data();
+            String docsid = snapshot.data.docs[index].id;
             return Container(
               height: size.height / 3.7,
               alignment: Alignment.center,
@@ -72,80 +114,61 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
                 child: Container(
                   height: size.height / 4,
                   width: size.width / 1.1,
-                  child: Stack(
+                  child: Column(
                     children: [
-                      Positioned(
-                        top: size.width / 28,
-                        left: size.width / 25,
-                        child: Container(
-                          height: size.height / 9,
-                          width: size.height / 9,
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.blue,
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        top: size.width / 18,
-                        left: size.width / 3.5,
-                        child: Container(
-                          width: size.width / 1.8,
-                          child: Text(
-                            "Dr Abdul Kalam Bro",
-                            style: TextStyle(
-                              fontSize: size.width / 22,
-                              fontWeight: FontWeight.w500,
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Container(
+                            height: size.height / 9,
+                            width: size.height / 9,
+                            decoration: BoxDecoration(
+                              image: DecorationImage(
+                                image: NetworkImage(
+                                    'https://image.freepik.com/free-vector/cartoon-male-doctor-holding-clipboard_29190-4660.jpg'),
+                                fit: BoxFit.contain,
+                              ),
+                              shape: BoxShape.circle,
                             ),
                           ),
-                        ),
-                      ),
-                      Positioned(
-                        top: size.width / 7.2,
-                        left: size.width / 3.5,
-                        child: Container(
-                          width: size.width / 1.8,
-                          child: Text(
-                            "Specialization",
-                            style: TextStyle(
-                              fontSize: size.width / 22,
-                              fontWeight: FontWeight.w500,
+                          SizedBox(
+                            width: size.width / 30,
+                          ),
+                          Container(
+                            width: size.width / 1.6,
+                            child: Text(
+                              map['name'],
+                              style: TextStyle(
+                                fontSize: size.width / 22,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
+                        ],
+                      ),
+                      SizedBox(
+                        height: size.height / 60,
+                      ),
+                      Container(
+                        height: size.width / 200,
+                        width: size.width / 1.2,
+                        color: Colors.grey,
+                      ),
+                      SizedBox(
+                        height: size.height / 60,
+                      ),
+                      Container(
+                        height: size.height / 15,
+                        width: size.width / 1.2,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            approvalButton(size, Colors.red[400], "Reject",
+                                () => onReject(docsid)),
+                            approvalButton(size, Colors.blue, "Accept",
+                                () => onAccept(map['uid'], docsid)),
+                          ],
                         ),
-                      ),
-                      Positioned(
-                        top: size.width / 5.2,
-                        left: size.width / 3.5,
-                        child: Container(
-                          width: size.width / 1.8,
-                          child: Text(
-                            "Qualification",
-                            style: TextStyle(
-                              fontSize: size.width / 22,
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        bottom: size.width / 5,
-                        left: size.width / 30,
-                        child: Container(
-                          height: size.width / 200,
-                          width: size.width / 1.2,
-                          color: Colors.grey,
-                        ),
-                      ),
-                      Positioned(
-                        bottom: size.width / 28,
-                        right: size.width / 25,
-                        child: approvalButton(size, Colors.blue, "Accept"),
-                      ),
-                      Positioned(
-                        bottom: size.width / 28,
-                        left: size.width / 25,
-                        child: approvalButton(size, Colors.red[400], "Reject"),
                       )
                     ],
                   ),
@@ -158,21 +181,25 @@ class _AdminHomeScreenState extends State<AdminHomeScreen> {
     );
   }
 
-  Widget approvalButton(Size size, Color color, String text) {
-    return Material(
-      elevation: 4,
-      borderRadius: BorderRadius.circular(8),
-      color: color,
-      child: Container(
-        height: size.height / 19,
-        width: size.width / 3.8,
-        alignment: Alignment.center,
-        child: Text(
-          text,
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: size.width / 25,
-            fontWeight: FontWeight.w500,
+  Widget approvalButton(
+      Size size, Color color, String text, Function function) {
+    return InkWell(
+      onTap: function,
+      child: Material(
+        elevation: 4,
+        borderRadius: BorderRadius.circular(8),
+        color: color,
+        child: Container(
+          height: size.height / 19,
+          width: size.width / 3.8,
+          alignment: Alignment.center,
+          child: Text(
+            text,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: size.width / 25,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
       ),

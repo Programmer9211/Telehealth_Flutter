@@ -11,6 +11,7 @@ class Schedule extends StatefulWidget {
 class _ScheduleState extends State<Schedule> {
   List<bool> isAvalible;
   List<bool> isappointed;
+  List<String> time = [];
   final String uid = FirebaseAuth.instance.currentUser.uid;
   List<String> docsId = [];
   FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -25,6 +26,8 @@ class _ScheduleState extends State<Schedule> {
           .get()
           .then((value) {
         snap = value.docs;
+
+        time = snap.map((e) => e.data()['time']).cast<String>().toList();
 
         isAvalible = snap
             .map((DocumentSnapshot e) {
@@ -115,7 +118,7 @@ class _ScheduleState extends State<Schedule> {
 
   Widget scheduleTime(String text, int index) {
     return ListTile(
-      title: Text(text),
+      title: Text(time[index]),
       subtitle:
           Text(isAvalible[index] ? "Status: Avalible" : "Status: Not Avalible"),
       trailing: PopupMenuButton(

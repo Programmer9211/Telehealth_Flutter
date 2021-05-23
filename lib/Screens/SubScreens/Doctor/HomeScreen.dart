@@ -24,6 +24,7 @@ class _DoctorHomescreenState extends State<DoctorHomescreen> {
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final TextEditingController _updateDataController = TextEditingController();
 
   @override
   void initState() {
@@ -119,7 +120,7 @@ class _DoctorHomescreenState extends State<DoctorHomescreen> {
             ),
             ListTile(
               onTap: () {
-                if (profileMap["image"] != " ") {
+                if (profileMap["image"] != "i") {
                   Navigator.pop(context);
                   Navigator.of(context).push(
                     MaterialPageRoute(
@@ -142,6 +143,42 @@ class _DoctorHomescreenState extends State<DoctorHomescreen> {
     );
   }
 
+  void updateData(String title) {
+    showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+              title: Text(title),
+              content: TextField(
+                controller: _updateDataController,
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text("Cancel"),
+                ),
+                TextButton(
+                  onPressed: () async {
+                    await _firestore
+                        .collection('doctor')
+                        .doc(_auth.currentUser.uid)
+                        .update({title: _updateDataController.text}).then(
+                            (value) {
+                      getProfile();
+                      Toast.show("Updated", context);
+                    });
+
+                    _updateDataController.clear();
+
+                    Navigator.pop(context);
+                  },
+                  child: Text("Update"),
+                )
+              ],
+            ));
+  }
+
   @override
   Widget build(BuildContext context) {
     final Size size = MediaQuery.of(context).size;
@@ -150,51 +187,55 @@ class _DoctorHomescreenState extends State<DoctorHomescreen> {
         ? SafeArea(
             child: Scaffold(
               key: _scaffoldKey,
-              drawer: DoctorDrawer(widget.prefs),
-              body: Column(
-                children: [
-                  header(size),
-                  InkWell(
-                    onTap: showOptions,
-                    child: Card(
-                      shape: CircleBorder(),
-                      elevation: 5,
-                      child: Container(
-                        height: size.height / 4,
-                        width: size.width / 2,
-                        decoration: BoxDecoration(
-                          shape: BoxShape.circle,
-                          image: DecorationImage(
-                            image: NetworkImage(profileMap['image'] != "i"
-                                ? profileMap['image']
-                                : "https://image.freepik.com/free-vector/cartoon-male-doctor-holding-clipboard_29190-4660.jpg"),
-                            fit: BoxFit.cover,
+              drawer: DoctorDrawer(widget.prefs, profileMap['name'],
+                  profileMap['email'], profileMap['image']),
+              body: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    header(size),
+                    InkWell(
+                      onTap: showOptions,
+                      child: Card(
+                        shape: CircleBorder(),
+                        elevation: 5,
+                        child: Container(
+                          height: size.height / 4,
+                          width: size.width / 2,
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            image: DecorationImage(
+                              image: NetworkImage(profileMap['image'] != "i"
+                                  ? profileMap['image']
+                                  : "https://image.freepik.com/free-vector/cartoon-male-doctor-holding-clipboard_29190-4660.jpg"),
+                              fit: BoxFit.cover,
+                            ),
                           ),
                         ),
                       ),
                     ),
-                  ),
-                  editTile(profileMap['name']),
-                  SizedBox(
-                    height: size.height / 50,
-                  ),
-                  editTile(profileMap['qualification']),
-                  SizedBox(
-                    height: size.height / 50,
-                  ),
-                  editTile(profileMap['ed']),
-                  SizedBox(
-                    height: size.height / 50,
-                  ),
-                  editTile("Experience: ${profileMap['experience']} years"),
-                  SizedBox(
-                    height: size.height / 50,
-                  ),
-                  editTile("Fee ${profileMap['fee']}/hr"),
-                  SizedBox(
-                    height: size.height / 50,
-                  ),
-                ],
+                    editTile(profileMap['name'], 'name'),
+                    SizedBox(
+                      height: size.height / 50,
+                    ),
+                    editTile(profileMap['qualification'], 'qualification'),
+                    SizedBox(
+                      height: size.height / 50,
+                    ),
+                    editTile(profileMap['ed'], 'ed'),
+                    SizedBox(
+                      height: size.height / 50,
+                    ),
+                    editTile("Experience: ${profileMap['experience']} years",
+                        'experience'),
+                    SizedBox(
+                      height: size.height / 50,
+                    ),
+                    editTile("Fee ${profileMap['fee']}/hr", 'fee'),
+                    SizedBox(
+                      height: size.height / 50,
+                    ),
+                  ],
+                ),
               ),
             ),
           )
@@ -209,9 +250,9 @@ class _DoctorHomescreenState extends State<DoctorHomescreen> {
           );
   }
 
-  Widget editTile(String text) {
+  Widget editTile(String text, String key) {
     return ListTile(
-      onTap: () {},
+      onTap: () => updateData(key),
       title: Text(text),
       trailing: Icon(
         Icons.edit,

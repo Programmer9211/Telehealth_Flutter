@@ -22,7 +22,7 @@ class Authenticate extends StatelessWidget {
           prefs: prefs,
         );
       } else {
-        return AdminHomeScreen();
+        return AdminHomeScreen(prefs);
       }
     } else {
       return WelcomeScreen(

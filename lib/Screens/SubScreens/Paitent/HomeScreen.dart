@@ -7,7 +7,6 @@ import 'package:tele_health_app/Screens/SubScreens/Paitent/AvalibleDoctors.dart'
 import 'package:tele_health_app/Screens/SubScreens/Paitent/Drawer.dart';
 import 'package:tele_health_app/Screens/SubScreens/Paitent/Profile.dart';
 import 'package:tele_health_app/Screens/SubScreens/Paitent/Search.dart';
-import 'package:toast/toast.dart';
 
 import '../Doctor/Verified.dart';
 
@@ -122,7 +121,40 @@ class _HomePageState extends State<HomePage> {
               SizedBox(
                 height: size.height / 30,
               ),
-              helpWidgeBuilder(size),
+              Container(
+                height: size.height / 6,
+                width: size.width,
+                alignment: Alignment.center,
+                child: GestureDetector(
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => AvalibleDoctors(),
+                    ),
+                  ),
+                  child: Material(
+                    elevation: 4,
+                    borderRadius: BorderRadius.circular(10),
+                    color: Colors.blueAccent,
+                    child: Container(
+                      height: size.height / 14,
+                      width: size.width / 1.2,
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(10),
+                        color: Colors.blueAccent,
+                      ),
+                      alignment: Alignment.center,
+                      child: Text(
+                        "Book Video Consultation",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontSize: size.width / 22,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
               SizedBox(
                 height: size.height / 30,
               ),
@@ -139,11 +171,11 @@ class _HomePageState extends State<HomePage> {
               SizedBox(
                 height: size.height / 60,
               ),
-              categoriesBuilder(size, "Fever", "Headache"),
+              categoriesBuilder(size, "ENT", "Allergist"),
               SizedBox(
                 height: size.height / 30,
               ),
-              categoriesBuilder(size, "Cough", "Cold"),
+              categoriesBuilder(size, "Dermatologist", "Infectious Disease"),
               SizedBox(
                 height: size.height / 25,
               ),
@@ -168,66 +200,6 @@ class _HomePageState extends State<HomePage> {
             Color.fromRGBO(55, 82, 178, 1),
           ),
         ],
-      ),
-    );
-  }
-
-  Widget helpWidgeBuilder(Size size) {
-    return Container(
-      height: size.height / 6,
-      width: size.width,
-      child: ListView.builder(
-          scrollDirection: Axis.horizontal,
-          itemCount: itemdata.length,
-          itemBuilder: (context, index) {
-            return items(
-              size,
-              index,
-            );
-          }),
-    );
-  }
-
-  Widget items(Size size, int index) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(
-        horizontal: 10.0,
-        vertical: 5,
-      ),
-      child: InkWell(
-        onTap: itemdata[index].func,
-        child: Material(
-          elevation: 5,
-          borderRadius: BorderRadius.circular(20),
-          child: Container(
-            height: size.height / 8,
-            width: size.width / 3.5,
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Container(
-                  height: size.height / 19,
-                  width: size.height / 19,
-                  decoration: BoxDecoration(
-                    image: DecorationImage(
-                      image: AssetImage(itemdata[index].imageUrl),
-                    ),
-                  ),
-                ),
-                SizedBox(
-                  height: size.height / 70,
-                ),
-                Text(
-                  itemdata[index].text,
-                  style: TextStyle(
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
       ),
     );
   }
@@ -387,14 +359,22 @@ class _CheckIfVerifiedState extends State<CheckIfVerified> {
   Widget build(BuildContext context) {
     if (profileSnap != null) {
       if (profileSnap['isverified'] == false) {
-        return Verify();
+        return Verify(prefs: widget.prefs);
       } else {
         return DoctorHomescreen(
           prefs: widget.prefs,
         );
       }
     } else {
-      return Container();
+      return Scaffold(
+        body: Center(
+          child: Container(
+            height: MediaQuery.of(context).size.height / 20,
+            width: MediaQuery.of(context).size.height / 20,
+            child: CircularProgressIndicator(),
+          ),
+        ),
+      );
     }
   }
 }
