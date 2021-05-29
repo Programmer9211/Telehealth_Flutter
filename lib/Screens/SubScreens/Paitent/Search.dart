@@ -36,7 +36,7 @@ class Search extends SearchDelegate {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (_) => AvalibleDoctors(
-                  category: "cold",
+                  category: "ent",
                 ),
               ),
             );
@@ -49,7 +49,7 @@ class Search extends SearchDelegate {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (_) => AvalibleDoctors(
-                  category: "cold",
+                  category: "Allergist",
                 ),
               ),
             );
@@ -62,7 +62,7 @@ class Search extends SearchDelegate {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (_) => AvalibleDoctors(
-                  category: "cold",
+                  category: "Dermatologist",
                 ),
               ),
             );
@@ -75,7 +75,7 @@ class Search extends SearchDelegate {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (_) => AvalibleDoctors(
-                  category: "cold",
+                  category: "Infectious Disease",
                 ),
               ),
             );

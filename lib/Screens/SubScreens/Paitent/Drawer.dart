@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tele_health_app/Authenticate/Account.dart';
 import 'package:tele_health_app/Screens/SubScreens/Paitent/Appointments.dart';
 import 'package:tele_health_app/Screens/SubScreens/Paitent/AvalibleDoctors.dart';
-import 'package:tele_health_app/Screens/SubScreens/Paitent/Chat%20Bot/Chatbot.dart';
+import 'package:tele_health_app/Screens/SubScreens/Paitent/ChatBot/chatBot.dart';
 import 'package:tele_health_app/Screens/SubScreens/Paitent/MedicalRecord.dart';
 import 'package:tele_health_app/Screens/SubScreens/Paitent/Profile.dart';
 
@@ -52,17 +52,7 @@ class AppDrawer extends StatelessWidget {
               ),
             );
           }),
-          SizedBox(
-            height: size.height / 60,
-          ),
-          tile(size, Icons.message, "Chat Bot", () {
-            Navigator.pop(context);
-            Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (_) => ChatBot(),
-              ),
-            );
-          }),
+
           SizedBox(
             height: size.height / 60,
           ),

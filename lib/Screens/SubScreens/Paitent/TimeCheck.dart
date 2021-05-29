@@ -2,6 +2,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:razorpay_flutter/razorpay_flutter.dart';
+import 'package:tele_health_app/Screens/SubScreens/Paitent/ChatBot/chatBot.dart';
 import 'package:toast/toast.dart';
 
 class TimeAvailible extends StatefulWidget {
@@ -51,21 +52,25 @@ class _TimeAvailibleState extends State<TimeAvailible> {
   }
 
   void onPayment() {
-    Map<String, dynamic> options = {
-      "key": "rzp_test_PR05SUaukQBiX2",
-      "amount": num.parse(widget.amount) * 100,
-      "name": "TeleHealth Application",
-      "description": "",
-      "prefill": {"contact": userMap['mob'], "email": userMap['email']},
-      "external": {
-        "wallets": ["paytm"]
-      }
-    };
+    if (selectedTime != null && listIndex != null) {
+      Map<String, dynamic> options = {
+        "key": "rzp_test_PR05SUaukQBiX2",
+        "amount": num.parse(widget.amount) * 100,
+        "name": "TeleHealth Application",
+        "description": "",
+        "prefill": {"contact": userMap['mob'], "email": userMap['email']},
+        "external": {
+          "wallets": ["paytm"]
+        }
+      };
 
-    try {
-      _razorpay.open(options);
-    } catch (e) {
-      print("error: $e");
+      try {
+        _razorpay.open(options);
+      } catch (e) {
+        print("error: $e");
+      }
+    } else {
+      Toast.show("Please select appointment time", context, duration: 2);
     }
   }
 
@@ -73,14 +78,24 @@ class _TimeAvailibleState extends State<TimeAvailible> {
     Toast.show(
         "Payment Sucessfull\nPayment Id: ${response.paymentId}\n OrderId : ${response.orderId}",
         context);
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => ChatBot(
+          doctoruid: widget.doctorId,
+          doctorname: widget.doctorname,
+          docsId: documentId[listIndex],
+          selectedtime: selectedTime,
+        ),
+      ),
+    );
   }
 
   void handlePaymentError(PaymentFailureResponse response) async {
-    Toast.show("Payment Sucessfull", context);
+    Toast.show("Payment Failed", context);
   }
 
   void handleExternalWallet(ExternalWalletResponse response) async {
-    Toast.show("Payment Sucessfull", context);
+    Toast.show("", context);
   }
 
   void initializeColor() {
@@ -119,44 +134,6 @@ class _TimeAvailibleState extends State<TimeAvailible> {
     }
   }
 
-  Future confirmAppointment() async {
-    if (selectedTime != null && listIndex != null) {
-      onPayment();
-      try {
-        await _firestore
-            .collection('doctor')
-            .doc(widget.doctorId)
-            .collection('schedule')
-            .doc(documentId[listIndex])
-            .update({"isappointed": true, "isavalible": false}).then(
-                (value) => print("Appointment sucessful"));
-
-        await _firestore
-            .collection('doctor')
-            .doc(widget.doctorId)
-            .collection('appointment')
-            .add({
-          "uid": _auth.currentUser.uid,
-          "name": _auth.currentUser.displayName,
-          "time": selectedTime,
-        });
-
-        await _firestore
-            .collection('paitent')
-            .doc(_auth.currentUser.uid)
-            .collection('appointment')
-            .add({
-          "name": widget.doctorname,
-          "time": selectedTime,
-        });
-      } catch (e) {
-        Toast.show("Error Occured", context);
-      }
-    } else {
-      Toast.show("Please select appointment time", context, duration: 2);
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -177,7 +154,7 @@ class _TimeAvailibleState extends State<TimeAvailible> {
                   return gridItems(size, index);
                 }),
             bottomNavigationBar: InkWell(
-              onTap: confirmAppointment,
+              onTap: onPayment,
               child: Container(
                 height: size.height / 9,
                 width: size.width,

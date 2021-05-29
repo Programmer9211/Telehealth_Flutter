@@ -1,7 +1,11 @@
+import 'package:agora_rtc_engine/rtc_engine.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:tele_health_app/Screens/SubScreens/Paitent/ViewProfile.dart';
+import 'package:tele_health_app/pages/call.dart';
+import 'package:toast/toast.dart';
 
 class Appointments extends StatefulWidget {
   @override
@@ -34,6 +38,11 @@ class _AppointmentsState extends State<Appointments> {
       setState(() {});
       print(appointmentList);
     });
+  }
+
+  Future<void> _handleCameraAndMic(Permission permission) async {
+    final status = await permission.request();
+    print(status);
   }
 
   @override
@@ -99,84 +108,122 @@ class _AppointmentsState extends State<Appointments> {
         child: Container(
           height: size.height / 4.5,
           width: size.width / 1.1,
-          child: Stack(
+          child: Column(
             children: [
-              Positioned(
-                top: size.width / 28,
-                left: size.width / 25,
-                child: Container(
-                  height: size.height / 10,
-                  width: size.height / 10,
-                  decoration: BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Colors.blue,
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Container(
+                    height: size.height / 10,
+                    width: size.height / 10,
+                    decoration: BoxDecoration(
+                        shape: BoxShape.circle,
+                        image: DecorationImage(
+                          image: NetworkImage(
+                              "https://image.freepik.com/free-vector/cartoon-male-doctor-holding-clipboard_29190-4660.jpg"),
+                          fit: BoxFit.cover,
+                        )),
                   ),
-                ),
-              ),
-              Positioned(
-                top: size.width / 14,
-                left: size.width / 3.5,
-                child: Container(
-                  width: size.width / 1.8,
-                  child: Text(
-                    appointmentList[index]['name'],
-                    style: TextStyle(
-                      fontSize: size.width / 22,
-                      fontWeight: FontWeight.w500,
-                    ),
+                  SizedBox(
+                    width: size.width / 12,
                   ),
-                ),
-              ),
-              Positioned(
-                top: size.width / 7,
-                left: size.width / 3.5,
-                child: Container(
-                  width: size.width / 1.8,
-                  child: Text(
-                    "Time : ${appointmentList[index]['time']}",
-                    style: TextStyle(
-                      fontSize: size.width / 22,
-                      fontWeight: FontWeight.w500,
-                    ),
-                  ),
-                ),
-              ),
-              Positioned(
-                bottom: size.width / 40,
-                left: size.width / 4.5,
-                child: GestureDetector(
-                  onTap: () => Navigator.of(context).push(
-                    MaterialPageRoute(
-                      builder: (_) => ViewProfile(
-                        uid: appointmentList[index]['uid'],
-                      ),
-                    ),
-                  ),
-                  child: Material(
-                    elevation: 4,
-                    borderRadius: BorderRadius.circular(10),
-                    color: Colors.blueAccent,
-                    child: Container(
-                      height: size.height / 16,
-                      width: size.width / 2,
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(10),
-                        color: Colors.blueAccent,
-                      ),
-                      alignment: Alignment.center,
-                      child: Text(
-                        "Doctor Profile",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: size.width / 22,
-                          fontWeight: FontWeight.w500,
+                  Column(
+                    children: [
+                      Container(
+                        width: size.width / 1.8,
+                        child: Text(
+                          appointmentList[index]['name'],
+                          style: TextStyle(
+                            fontSize: size.width / 22,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
-                    ),
+                      Container(
+                        width: size.width / 1.8,
+                        child: Text(
+                          "Time : ${appointmentList[index]['time']}",
+                          style: TextStyle(
+                            fontSize: size.width / 22,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                ],
+              ),
+              SizedBox(
+                height: size.height / 25,
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  customeButton(size, "Join Call", Colors.green, () async {
+                    await _handleCameraAndMic(Permission.camera);
+                    await _handleCameraAndMic(Permission.microphone);
+
+                    if (await Permission.camera.isGranted &&
+                        await Permission.microphone.isGranted) {
+                      Navigator.of(context).pushReplacement(
+                        MaterialPageRoute(
+                          builder: (_) => CallPage(
+                            channelName: "join",
+                            role: ClientRole.Broadcaster,
+                          ),
+                        ),
+                      );
+                    } else {
+                      Toast.show("Please Allow Permission", context);
+                      await _handleCameraAndMic(Permission.camera);
+                      await _handleCameraAndMic(Permission.microphone);
+                    }
+                  }),
+                  SizedBox(
+                    width: size.width / 10,
                   ),
-                ),
+                  customeButton(
+                      size,
+                      "Doctor Profile",
+                      Colors.blueAccent,
+                      () => Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => ViewProfile(
+                                uid: appointmentList[index]['uid'],
+                              ),
+                            ),
+                          )),
+                ],
               )
             ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget customeButton(Size size, String name, Color color, Function function) {
+    return GestureDetector(
+      onTap: function,
+      child: Material(
+        elevation: 4,
+        borderRadius: BorderRadius.circular(10),
+        color: Colors.blueAccent,
+        child: Container(
+          height: size.height / 18,
+          width: size.width / 3,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(10),
+            color: color,
+          ),
+          alignment: Alignment.center,
+          child: Text(
+            name,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: size.width / 22,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
       ),
