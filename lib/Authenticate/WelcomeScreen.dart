@@ -44,7 +44,7 @@ class _WelcomeScreenState extends State<WelcomeScreen> {
             height: size.height / 10,
           ),
           Text(
-            "Welcome to telehealth app",
+            "Welcome to Telehealth app",
             style: TextStyle(
               fontSize: size.width / 14,
               fontWeight: FontWeight.w500,

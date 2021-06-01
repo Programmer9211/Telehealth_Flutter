@@ -25,7 +25,7 @@ class AppDrawer extends StatelessWidget {
             accountName: Text("Aditya"),
             accountEmail: Text("adityachaudhary@gmail.com"),
             decoration: BoxDecoration(
-                color: Colors.amber,
+                color: Colors.blue,
                 borderRadius: BorderRadius.vertical(
                   bottom: Radius.circular(10),
                 )),

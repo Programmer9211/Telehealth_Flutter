@@ -35,7 +35,7 @@ class _PaitentFormState extends State<PaitentForm> {
       "height": _height.text,
       "weight": _weight.text,
       "password": _password.text,
-      "image": ""
+      "image": "i"
     };
 
     createAccount(_name.text, _email.text, _password.text, context)

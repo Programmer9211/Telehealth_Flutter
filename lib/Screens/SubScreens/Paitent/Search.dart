@@ -2,6 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:tele_health_app/Screens/SubScreens/Paitent/AvalibleDoctors.dart';
 
 class Search extends SearchDelegate {
+  List<String> data = [
+    "ent",
+    "dermatologist",
+    "infectious disease",
+    "allergist",
+  ];
+
   @override
   List<Widget> buildActions(BuildContext context) {
     return [
@@ -22,7 +29,23 @@ class Search extends SearchDelegate {
 
   @override
   Widget buildResults(BuildContext context) {
-    return Text("");
+    if (query != null && data.contains(query.toLowerCase())) {
+      return tiles(
+        query,
+        () {
+          Navigator.pop(context);
+          Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (_) => AvalibleDoctors(
+                category: query,
+              ),
+            ),
+          );
+        },
+      );
+    } else {
+      return Text("No result Found");
+    }
   }
 
   @override

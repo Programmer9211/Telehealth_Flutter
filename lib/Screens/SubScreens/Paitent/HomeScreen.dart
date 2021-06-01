@@ -171,11 +171,13 @@ class _HomePageState extends State<HomePage> {
               SizedBox(
                 height: size.height / 60,
               ),
-              categoriesBuilder(size, "ENT", "Allergist"),
+              categoriesBuilder(
+                  size, "ENT", "Allergist", "assets/ent.jpeg", "assets/a.jpeg"),
               SizedBox(
                 height: size.height / 30,
               ),
-              categoriesBuilder(size, "Dermatologist", "Infectious Disease"),
+              categoriesBuilder(size, "Dermatologist", "Infectious Disease",
+                  "assets/d.jpeg", "assets/i.jpeg"),
               SizedBox(
                 height: size.height / 25,
               ),
@@ -186,16 +188,17 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Widget categoriesBuilder(Size size, String text1, String text2) {
+  Widget categoriesBuilder(
+      Size size, String text1, String text2, String url1, String url2) {
     return Container(
       height: size.height / 5,
       width: size.width,
       child: Row(
         children: [
-          categoriesItems(size, "assets/1.png", text1, Colors.white),
+          categoriesItems(size, url1, text1, Colors.white),
           categoriesItems(
             size,
-            "assets/2.png",
+            url2,
             text2,
             Color.fromRGBO(55, 82, 178, 1),
           ),
@@ -218,28 +221,35 @@ class _HomePageState extends State<HomePage> {
         child: Material(
           elevation: 5,
           borderRadius: BorderRadius.circular(15),
-          color: color,
+          color: Colors.white,
           child: Container(
             height: size.height / 5,
             width: size.width / 2.4,
             child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisAlignment: MainAxisAlignment.start,
               children: [
                 Container(
-                  height: size.height / 12,
-                  width: size.height / 12,
+                  height: size.height / 8,
+                  width: size.width / 2.4,
                   decoration: BoxDecoration(
+                    borderRadius: BorderRadius.vertical(
+                      top: Radius.circular(15),
+                    ),
                     image: DecorationImage(
                       image: AssetImage(imageUrl),
+                      fit: BoxFit.cover,
                     ),
                   ),
+                ),
+                SizedBox(
+                  height: size.width / 30,
                 ),
                 Text(
                   text,
                   style: TextStyle(
-                    fontSize: 16,
+                    fontSize: size.width / 22,
                     fontWeight: FontWeight.w500,
-                    color: color != Colors.white ? Colors.white : Colors.black,
+                    //color: color != Colors.white ? Colors.white : Colors.black,
                   ),
                 )
               ],

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tele_health_app/Authenticate/Account.dart';
 import 'package:tele_health_app/Screens/SubScreens/Doctor/Appointment.dart';
+import 'package:tele_health_app/Screens/SubScreens/Doctor/Notification.dart';
 import 'package:tele_health_app/Screens/SubScreens/Doctor/Schedule.dart';
 
 class DoctorDrawer extends StatelessWidget {
@@ -59,6 +60,22 @@ class DoctorDrawer extends StatelessWidget {
               Navigator.of(context).push(
                 MaterialPageRoute(
                   builder: (_) => DoctorAppointment(),
+                ),
+              );
+            },
+          ),
+          SizedBox(
+            height: size.height / 50,
+          ),
+          tile(
+            size,
+            Icons.calendar_today,
+            "FeedBacks",
+            () {
+              Navigator.pop(context);
+              Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (_) => Reviews(),
                 ),
               );
             },
