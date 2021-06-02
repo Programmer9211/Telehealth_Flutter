@@ -212,7 +212,7 @@ class _ProfileState extends State<Profile> {
               ),
               GestureDetector(
                 onTap: onImageTap,
-                child: user['image'] != " "
+                child: user['image'] != "i"
                     ? Container(
                         height: size.height / 3.5,
                         width: size.width,

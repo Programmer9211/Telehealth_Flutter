@@ -22,7 +22,7 @@ class CallPage extends StatefulWidget {
 class _CallPageState extends State<CallPage> {
   static const APP_ID = "2ae7dfee5a674c2ea50cb8695817ac65";
   static const Token =
-      "0062ae7dfee5a674c2ea50cb8695817ac65IAAHXCNGQ9ftTzM6G7+GqSjIjR9TBywjW+Vfcdn5yfZDz9fYYSgAAAAAEABZxLUYjLCrYAEAAQCLsKtg";
+      "006a631105a3ee64c5fa280161de56e43aaIAALW208YiLV+cTRj4up+4n9gKBO60dpVMllzcnom898ZdfYYSgAAAAAEADWh9DjBZS4YAEAAQABlLhg";
   final _users = <int>[];
   final _infoStrings = <String>[];
   bool muted = false;

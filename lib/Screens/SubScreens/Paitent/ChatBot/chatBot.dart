@@ -35,7 +35,8 @@ class _ChatBotState extends State<ChatBot> {
           .collection('schedule')
           .doc(widget.docsId)
           .update({"isappointed": true, "isavalible": false}).then(
-              (value) => print("Appointment sucessful"));
+        (value) => print("Appointment sucessful"),
+      );
 
       await _firestore
           .collection('doctor')
@@ -55,6 +56,7 @@ class _ChatBotState extends State<ChatBot> {
           .add({
         "name": widget.doctorname,
         "time": widget.selectedtime,
+        "uid": widget.doctoruid,
       });
     } catch (e) {
       Toast.show("Error Occured", context);

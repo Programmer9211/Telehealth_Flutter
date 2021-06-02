@@ -1,7 +1,11 @@
+import 'dart:io';
+
 import 'package:agora_rtc_engine/rtc_engine.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
+import 'package:image_picker/image_picker.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:tele_health_app/Screens/SubScreens/Paitent/Profile.dart';
 import 'package:tele_health_app/pages/call.dart';
@@ -14,14 +18,62 @@ class DoctorAppointment extends StatefulWidget {
 
 class _DoctorAppointmentState extends State<DoctorAppointment> {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
   final String _uid = FirebaseAuth.instance.currentUser.uid;
   List<Map<String, dynamic>> appointmentMap;
   String imageUrl;
+  File image;
 
   @override
   void initState() {
     super.initState();
     getAppointments();
+  }
+
+  Future selectImage(int index) async {
+    ImagePicker pick = ImagePicker();
+
+    try {
+      await pick.getImage(source: ImageSource.gallery).then((value) {
+        setState(() {
+          if (value != null) {
+            image = File(value.path);
+            uploadImage(index);
+          } else {
+            Toast.show("Please select an image", context);
+          }
+        });
+      });
+    } catch (e) {
+      Toast.show("Error", context);
+    }
+  }
+
+  Future uploadImage(int index) async {
+    try {
+      Reference _ref = FirebaseStorage.instance.ref().child('images/');
+
+      UploadTask uploadTask = _ref.putFile(image);
+
+      await uploadTask.snapshot.ref.getDownloadURL().then((value) async {
+        if (value != null) {
+          print(value);
+          Toast.show("Image Uploaded Sucessfully", context);
+          await _firestore
+              .collection('paitent')
+              .doc(appointmentMap[index]['uid'])
+              .collection('prescription')
+              .add({
+            "name": _auth.currentUser.displayName,
+            "url": value,
+          });
+        } else {
+          Toast.show("An Error Occured while uploading Image", context);
+        }
+      });
+    } catch (e) {
+      Toast.show("An Error Occured while uploading Image", context);
+    }
   }
 
   Future<void> _handleCameraAndMic(Permission permission) async {
@@ -135,7 +187,7 @@ class _DoctorAppointmentState extends State<DoctorAppointment> {
 
   Widget appointmentItems(Size size, int index) {
     return Container(
-      height: size.height / 4,
+      height: size.height / 3,
       width: size.height,
       alignment: Alignment.center,
       child: Material(
@@ -143,7 +195,7 @@ class _DoctorAppointmentState extends State<DoctorAppointment> {
         borderRadius: BorderRadius.circular(10),
         elevation: 10,
         child: Container(
-          height: size.height / 4.5,
+          height: size.height / 3.5,
           width: size.width / 1.1,
           child: Column(
             children: [
@@ -220,7 +272,31 @@ class _DoctorAppointmentState extends State<DoctorAppointment> {
                   customButton(size, index, "Medical History",
                       Colors.blueAccent, () => getMedicalHistory(index)),
                 ],
-              )
+              ),
+              SizedBox(
+                height: size.height / 50,
+              ),
+              InkWell(
+                onTap: () => selectImage(index),
+                child: Material(
+                  elevation: 5,
+                  borderRadius: BorderRadius.circular(8),
+                  color: Colors.blue,
+                  child: Container(
+                    height: size.height / 18,
+                    width: size.width / 1.3,
+                    alignment: Alignment.center,
+                    child: Text(
+                      "Give Prescription",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: size.width / 25,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
             ],
           ),
         ),

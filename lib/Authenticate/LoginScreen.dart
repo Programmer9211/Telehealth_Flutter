@@ -158,9 +158,7 @@ class _LoginScreenState extends State<LoginScreen> {
                           Icons.arrow_back_ios_outlined,
                         ),
                         //onPressed: () => Navigator.pop(context),
-                        onPressed: () => Navigator.of(context).push(
-                            MaterialPageRoute(
-                                builder: (_) => AdminHomeScreen(widget.prefs))),
+                        onPressed: () => Navigator.pop(context),
                       ),
                     ),
               SizedBox(
@@ -192,8 +190,8 @@ class _LoginScreenState extends State<LoginScreen> {
               Container(
                 width: size.width,
                 alignment: Alignment.center,
-                child:
-                    textField(size, 'email', Icons.account_box_rounded, _email),
+                child: textField(
+                    size, 'email', Icons.account_box_rounded, _email, false),
               ),
               SizedBox(
                 height: size.height / 40,
@@ -201,7 +199,7 @@ class _LoginScreenState extends State<LoginScreen> {
               Container(
                 width: size.width,
                 alignment: Alignment.center,
-                child: textField(size, 'password', Icons.lock, _password),
+                child: textField(size, 'password', Icons.lock, _password, true),
               ),
               Container(
                 height: size.height / 30,
@@ -259,12 +257,14 @@ class _LoginScreenState extends State<LoginScreen> {
   }
 
   Widget textField(Size size, String title, IconData icon,
-      TextEditingController controller) {
+      TextEditingController controller, bool isobsecure) {
     return Container(
       width: size.width / 1.1,
       alignment: Alignment.center,
       child: TextField(
         controller: controller,
+        obscureText: isobsecure,
+        obscuringCharacter: "*",
         decoration: InputDecoration(
           prefixIcon: Icon(icon),
           border: OutlineInputBorder(

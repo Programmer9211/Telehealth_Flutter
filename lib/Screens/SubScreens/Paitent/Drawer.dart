@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:tele_health_app/Authenticate/Account.dart';
@@ -5,6 +6,7 @@ import 'package:tele_health_app/Screens/SubScreens/Paitent/Appointments.dart';
 import 'package:tele_health_app/Screens/SubScreens/Paitent/AvalibleDoctors.dart';
 import 'package:tele_health_app/Screens/SubScreens/Paitent/ChatBot/chatBot.dart';
 import 'package:tele_health_app/Screens/SubScreens/Paitent/MedicalRecord.dart';
+import 'package:tele_health_app/Screens/SubScreens/Paitent/Prescription.dart';
 import 'package:tele_health_app/Screens/SubScreens/Paitent/Profile.dart';
 
 class AppDrawer extends StatelessWidget {
@@ -14,6 +16,8 @@ class AppDrawer extends StatelessWidget {
 
   AppDrawer({this.profileFunction, this.userMap, this.prefs});
 
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+
   @override
   Widget build(BuildContext context) {
     final size = MediaQuery.of(context).size;
@@ -22,8 +26,8 @@ class AppDrawer extends StatelessWidget {
       child: Column(
         children: [
           UserAccountsDrawerHeader(
-            accountName: Text("Aditya"),
-            accountEmail: Text("adityachaudhary@gmail.com"),
+            accountName: Text(_auth.currentUser.displayName),
+            accountEmail: Text(_auth.currentUser.email),
             decoration: BoxDecoration(
                 color: Colors.blue,
                 borderRadius: BorderRadius.vertical(
@@ -72,6 +76,17 @@ class AppDrawer extends StatelessWidget {
             Navigator.of(context).push(
               MaterialPageRoute(
                 builder: (_) => AvalibleDoctors(),
+              ),
+            );
+          }),
+          SizedBox(
+            height: size.height / 60,
+          ),
+          tile(size, Icons.medical_services_outlined, "Prescription", () {
+            Navigator.pop(context);
+            Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (_) => Prescription(),
               ),
             );
           }),
